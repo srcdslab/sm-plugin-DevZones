@@ -8,9 +8,9 @@
 #define ZONE_PREFIX "noblock"
 //End
 
-new bool:noblock[MAXPLAYERS+1] = false;
+bool noblock[MAXPLAYERS+1] = { false, ... };
 
-public Plugin:myinfo =
+public Plugin myinfo =
 {
 	name = "SM DEV Zones - NoBlock",
 	author = "Franc1sco franug",
