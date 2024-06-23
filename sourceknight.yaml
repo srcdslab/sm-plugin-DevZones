@@ -1,0 +1,33 @@
+project:
+  sourceknight: 0.2
+  name: DevZones
+  dependencies:
+    - name: sourcemod
+      type: tar
+      version: 1.11.0-git6966
+      location: https://sm.alliedmods.net/smdrop/1.11/sourcemod-1.11.0-git6966-linux.tar.gz
+      unpack:
+      - source: /addons
+        dest: /addons
+
+    - name: multicolors
+      type: git
+      repo: https://github.com/srcdslab/sm-plugin-MultiColors
+      unpack:
+      - source: /addons/sourcemod/scripting/include
+        dest: /addons/sourcemod/scripting/include
+
+  root: /
+  output: /addons/sourcemod/plugins
+  targets:
+    - devzones
+    - devzones_ammo
+    - devzones_anticamp
+    - devzones_hide
+    - devzones_jail
+    - devzones_noblock
+    - devzones_nodamage
+    - devzones_noentry
+    - devzones_nohud
+    - devzones_slap
+    - devzones_teleport
