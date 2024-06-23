@@ -59,7 +59,8 @@ public void Zone_OnClientEntry(int client, const char[] zone)
 	if(client < 1 || client > MaxClients || !IsClientInGame(client) ||!IsPlayerAlive(client)) 
 		return;
 
-	if(StrContains(zone, "hide", false) != 0) return;
+	if(StrContains(zone, "hide", false) != 0)
+		return;
 
 	PrintHintText(client, "You entered in a hide teammates zone to improve the vision");
 	CPrintToChat(client," {darkred}[HIDE TEAMMATES]{lime}You entered in a hide teammates zone to improve the vision");

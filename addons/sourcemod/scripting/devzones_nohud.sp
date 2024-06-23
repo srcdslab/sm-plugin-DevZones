@@ -21,7 +21,8 @@ public void Zone_OnClientEntry(int client, const char[] zone)
 	if(client < 1 || client > MaxClients || !IsClientInGame(client) ||!IsPlayerAlive(client)) 
 		return;
 
-	if(StrContains(zone, "nohud", false) != 0) return;
+	if(StrContains(zone, "nohud", false) != 0)
+		return;
 
 	SetEntProp(client, Prop_Send, "m_iHideHUD", GetEntProp(client, Prop_Send, "m_iHideHUD") | HIDEHUD_ALL);
 }
@@ -31,7 +32,8 @@ public void Zone_OnClientLeave(int client, const char[] zone)
 	if(client < 1 || client > MaxClients || !IsClientInGame(client) ||!IsPlayerAlive(client)) 
 		return;
 		
-	if(StrContains(zone, "nohud", false) != 0) return;
-	
+	if(StrContains(zone, "nohud", false) != 0)
+		return;
+
 	SetEntProp(client, Prop_Send, "m_iHideHUD", GetEntProp(client, Prop_Send, "m_iHideHUD") & ~HIDEHUD_ALL);
 }
