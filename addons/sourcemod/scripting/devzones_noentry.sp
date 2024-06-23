@@ -1,17 +1,18 @@
-#pragma semicolon 1
 #include <sourcemod>
 #include <sdktools>
 #include <devzones>
+
+#pragma semicolon 1
+#pragma newdecls required
 
 // configuration
 #define ZONE_PREFIX "noentry"
 //End
 
+float zone_pos[MAXPLAYERS+1][3];
+Handle g_hClientTimers[MAXPLAYERS + 1] = {INVALID_HANDLE, ...};
 
-new Float:zone_pos[MAXPLAYERS+1][3];
-new Handle:g_hClientTimers[MAXPLAYERS + 1] = {INVALID_HANDLE, ...};
-
-public Plugin:myinfo =
+public Plugin myinfo =
 {
 	name = "SM DEV Zones - NoEntry",
 	author = "Franc1sco franug",
@@ -20,14 +21,14 @@ public Plugin:myinfo =
 	url = "http://steamcommunity.com/id/franug"
 };
 
-public OnClientDisconnect(client)
+public void OnClientDisconnect(int client)
 {
 	if (g_hClientTimers[client] != INVALID_HANDLE)
 		KillTimer(g_hClientTimers[client]);
 	g_hClientTimers[client] = INVALID_HANDLE;
 }
 
-public Zone_OnClientEntry(client, String:zone[])
+public void Zone_OnClientEntry(int client, const char[] zone)
 {
 	if(client < 1 || client > MaxClients || !IsClientInGame(client) ||!IsPlayerAlive(client)) 
 		return;
@@ -40,7 +41,7 @@ public Zone_OnClientEntry(client, String:zone[])
 	}
 }
 
-public Zone_OnClientLeave(client, String:zone[])
+public void Zone_OnClientLeave(int client, const char[] zone)
 {
 	if(client < 1 || client > MaxClients || !IsClientInGame(client) ||!IsPlayerAlive(client)) 
 		return;
@@ -53,7 +54,7 @@ public Zone_OnClientLeave(client, String:zone[])
 	}
 }
 
-public Action:Timer_Repeat(Handle:timer, any:client)
+public Action Timer_Repeat(Handle timer, any client)
 {
 	if(!IsClientInGame(client) || !IsPlayerAlive(client))
 	{
@@ -62,17 +63,17 @@ public Action:Timer_Repeat(Handle:timer, any:client)
 		g_hClientTimers[client] = INVALID_HANDLE;
 		return Plugin_Stop;
 	}
-	new Float:clientloc[3];
+	float clientloc[3];
 	GetClientAbsOrigin(client, clientloc);
 	
 	KnockbackSetVelocity(client, zone_pos[client], clientloc, 300.0);
 	return Plugin_Continue;
 }
 
-KnockbackSetVelocity(client, const Float:startpoint[3], const Float:endpoint[3], Float:magnitude)
+stock void KnockbackSetVelocity(int client, const float startpoint[3], const float endpoint[3], float magnitude)
 {
     // Create vector from the given starting and ending points.
-    new Float:vector[3];
+    float vector[3];
     MakeVectorFromPoints(startpoint, endpoint, vector);
     
     // Normalize the vector (equal magnitude at varying distances).
@@ -80,7 +81,6 @@ KnockbackSetVelocity(client, const Float:startpoint[3], const Float:endpoint[3],
     
     // Apply the magnitude by scaling the vector (multiplying each of its components).
     ScaleVector(vector, magnitude);
-    
 
     TeleportEntity(client, NULL_VECTOR, NULL_VECTOR, vector);
 }
