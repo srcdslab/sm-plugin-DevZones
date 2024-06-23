@@ -38,9 +38,7 @@ public void Zone_OnClientEntry(int client, const char[] zone)
 		return;
 
 	if(StrContains(zone, ZONE_PREFIX, false) == 0)
-	{
 		noblock[client] = true;
-	}
 }
 
 public void Zone_OnClientLeave(int client, const char[] zone)
@@ -49,9 +47,7 @@ public void Zone_OnClientLeave(int client, const char[] zone)
 		return;
 
 	if(StrContains(zone, ZONE_PREFIX, false) == 0)
-	{
 		noblock[client] = false;
-	}
 }
 
 public void OnClientPutInServer(int client)

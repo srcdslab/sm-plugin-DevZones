@@ -21,7 +21,7 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-#define VERSION "4.1.0"
+#define VERSION "4.1.1"
 #define MAX_ZONES 256
 
 int beamColorT[4] =  { 255, 0, 0, 255 };
@@ -463,7 +463,7 @@ public Action fnHookSay(int client, int args)
 		PrintToChat(client, "the name is too long, try other name");
 		return Plugin_Continue;
 	}
-	if (StrEqual(sArgs, "!cancel"))
+	if (strcmp(sArgs, "!cancel", false) == 0)
 	{
 		PrintToChat(client, "Set name action canceled");
 		EditorMenu(client);
@@ -475,7 +475,7 @@ public Action fnHookSay(int client, int args)
 	{
 		Handle trie = GetArrayCell(g_Zones, i);
 		GetTrieString(trie, "name", ZoneId, 64);
-		if (StrEqual(ZoneId, sArgs))
+		if (strcmp(ZoneId, sArgs, false) == 0)
 		{
 			PrintToChat(client, "The name already exist, write other name");
 			return Plugin_Continue;
@@ -523,7 +523,7 @@ public int Native_InZone(Handle plugin, int argc)
 	{
 		if (same)
 		{
-			if (StrEqual(g_iZones[client][i].liName, name, sensitive) && g_iZones[client][i].liThis)
+			if (strcmp(g_iZones[client][i].liName, name, sensitive) == 0 && g_iZones[client][i].liThis)
 				return true;
 		}
 		else
@@ -567,7 +567,7 @@ public int Native_GetZonePos(Handle plugin, int argc)
 		for (int i = 0; i < size; ++i)
 		{
 			GetTrieString(GetArrayCell(g_Zones, i), "name", namezone, 64);
-			if (StrEqual(name, namezone, sensitive))
+			if (strcmp(name, namezone, sensitive) == 0)
 			{
 				GetTrieArray(GetArrayCell(g_Zones, i), "corda", posA, sizeof(posA));
 				GetTrieArray(GetArrayCell(g_Zones, i), "cordb", posB, sizeof(posB));
@@ -600,7 +600,7 @@ public int Native_GetZoneCord(Handle plugin, int argc)
 		for (int i = 0; i < size; ++i)
 		{
 			GetTrieString(GetArrayCell(g_Zones, i), "name", namezone, 64);
-			if (StrEqual(name, namezone, sensitive))
+			if (strcmp(name, namezone, sensitive) == 0)
 			{
 				GetTrieArray(GetArrayCell(g_Zones, i), "corda", posA, sizeof(posA));
 				GetTrieArray(GetArrayCell(g_Zones, i), "cordb", posB, sizeof(posB));
@@ -629,8 +629,10 @@ public int Native_ZoneExist(Handle plugin, int argc)
 		for (int i = 0; i < size; ++i)
 		{
 			GetTrieString(GetArrayCell(g_Zones, i), "name", namezone, 64);
-			if (same)if (StrEqual(name, namezone, sensitive))return true;
-			else if (StrContains(name, namezone, sensitive) == 0)return true;
+			if (same && strcmp(name, namezone, sensitive) == 0)
+				return true;
+			else if (StrContains(name, namezone, sensitive) == 0)
+				return true;
 		}
 	}
 	return false;
@@ -651,29 +653,29 @@ public any Native_isPositionInZone(Handle plugin, int numParams)
 	int found = 0;
 	
 	int size = GetArraySize(g_Zones);
-	if (size > 0) {
-		for (int i = 0; i < size; ++i) {
+	if (size > 0)
+	{
+		for (int i = 0; i < size; ++i)
+		{
 			char name[64];
 			GetTrieString(GetArrayCell(g_Zones, i), "name", name, sizeof(name));
 			float posA[3];
 			float posB[3];
 			GetTrieArray(GetArrayCell(g_Zones, i), "corda", posA, sizeof(posA));
 			GetTrieArray(GetArrayCell(g_Zones, i), "cordb", posB, sizeof(posB));
-			if(same)
+
+			if (same)
 			{
-				if (StrEqual(name, zonename, sensitive))
+				if (strcmp(name, zonename, sensitive) == 0)
 					found += view_as<int>(IsbetweenRect(pos, posA, posB, 0));
-			}else{
-				
+			}
+			else
+			{
 				if (StrContains(name, zonename, sensitive) != -1)
-				{	
-					
 					found += view_as<int>(IsbetweenRect(pos, posA, posB, 0));
-				}
 			}
 		}
 	}
-	
 	return view_as<bool>(found > 0);
 }
 

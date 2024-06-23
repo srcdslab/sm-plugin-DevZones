@@ -58,7 +58,8 @@ public void Zone_OnClientEntry(int client, const char[] zone)
 	if(client < 1 || client > MaxClients || !IsClientInGame(client) ||!IsPlayerAlive(client)) 
 		return;
 			
-	if(StrContains(zone, "ammo", false) != 0) return;
+	if(StrContains(zone, "ammo", false) != 0)
+		return;
 	PrintHintText(client, "UNLIMITED AMMO ZONE");
 	infiniteammo[client] = true;
 }
@@ -68,8 +69,9 @@ public void Zone_OnClientLeave(int client, const char[] zone)
 	if(client < 1 || client > MaxClients || !IsClientInGame(client) ||!IsPlayerAlive(client)) 
 		return;
 		
-	if(StrContains(zone, "ammo", false) != 0) return;
-	
+	if(StrContains(zone, "ammo", false) != 0)
+		return;
+
 	infiniteammo[client] = false;
 }
 
