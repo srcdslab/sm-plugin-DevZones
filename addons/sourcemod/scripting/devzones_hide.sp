@@ -1,14 +1,16 @@
-#pragma semicolon 1
 #include <sourcemod>
 #include <sdktools>
 #include <sdkhooks>
 #include <devzones>
 #include <multicolors>
 
-new bool:hide[MAXPLAYERS+1];
-new equipo[MAXPLAYERS+1];
+#pragma semicolon 1
+#pragma newdecls required
 
-public Plugin:myinfo =
+bool hide[MAXPLAYERS+1];
+int team[MAXPLAYERS+1];
+
+public Plugin myinfo =
 {
 	name = "SM DEV Zones - Hide",
 	author = "Franc1sco franug",
@@ -17,86 +19,85 @@ public Plugin:myinfo =
 	url = "http://www.zeuszombie.com/"
 };
 
-public OnPluginStart()
+public void OnPluginStart()
 {
 	HookEvent("player_spawn", PlayerSpawn);
 	HookEvent("player_team", Event_PlayerTeam);
 }
 
-public OnClientDisconnect(client)
+public void OnClientDisconnect(int client)
 {
 	hide[client] = false;
 }
 
-public Event_PlayerTeam(Handle:event, const String:name[], bool:dontBroadcast)
+public Action Event_PlayerTeam(Handle event, const char[] name, bool dontBroadcast)
 {
-	new client = GetClientOfUserId(GetEventInt(event, "userid"));
-	equipo[client] = GetEventInt(event, "team");
+	int client = GetClientOfUserId(GetEventInt(event, "userid"));
+	team[client] = GetEventInt(event, "team");
+	return Plugin_Continue;
 }
 
-public Action:PlayerSpawn(Handle:event, const String:name[], bool:dontBroadcast)
+public Action PlayerSpawn(Handle event, const char[] name, bool dontBroadcast)
 {
-	new client = GetClientOfUserId(GetEventInt(event, "userid"));
-	
-	if(hide[client]) NoHide(client);
-	CreateTimer(4.0, Pasado, client);
+	int client = GetClientOfUserId(GetEventInt(event, "userid"));
+	if (hide[client])
+		NoHide(client);
+
+	CreateTimer(4.0, OnPostPlayerSpawn, client);
+	return Plugin_Continue;
 }
 
-public Action:Pasado(Handle:timer, any:client)
+public Action OnPostPlayerSpawn(Handle timer, any client)
 {
-	if(IsClientInGame(client)) 
-		if(hide[client]) NoHide(client);
+	if (IsClientInGame(client) && hide[client])
+		NoHide(client);
+	return Plugin_Continue;
 }
 
-public Zone_OnClientEntry(client, String:zone[])
+public void Zone_OnClientEntry(int client, const char[] zone)
 {
 	if(client < 1 || client > MaxClients || !IsClientInGame(client) ||!IsPlayerAlive(client)) 
 		return;
-		
+
 	if(StrContains(zone, "hide", false) != 0) return;
-	
+
 	PrintHintText(client, "You entered in a hide teammates zone to improve the vision");
 	CPrintToChat(client," {darkred}[HIDE TEAMMATES]{lime}You entered in a hide teammates zone to improve the vision");
-	
-	if(!hide[client]) YesHide(client);
-	
+
+	if(!hide[client])
+		YesHide(client);
 }
 
-public Zone_OnClientLeave(client, String:zone[])
+public void Zone_OnClientLeave(int client, const char[] zone)
 {
-	if(client < 1 || client > MaxClients || !IsClientInGame(client) ||!IsPlayerAlive(client)) 
+	if (client < 1 || client > MaxClients || !IsClientInGame(client) ||!IsPlayerAlive(client)) 
 		return;
 		
-	if(StrContains(zone, "hide", false) != 0) return;
-	
+	if (StrContains(zone, "hide", false) != 0)
+		return;
+
 	PrintHintText(client, "You left the hide teammates zone");
 	CPrintToChat(client," {darkred}[HIDE TEAMMATES]{lime}You left the hide teammates zone");
 	
-	if(hide[client]) NoHide(client);
-
+	if (hide[client])
+		NoHide(client);
 }
 
-public Action:Hook_SetTransmit(entity, client) 
+public Action Hook_SetTransmit(int entity, int client) 
 { 
-    if (entity != client && equipo[client] == equipo[entity]) 
+    if (entity != client && team[client] == team[entity]) 
         return Plugin_Handled;
-     
-    return Plugin_Continue; 
-}  
+    return Plugin_Continue;
+}
 
-
-NoHide(client)
+stock void NoHide(int client)
 {
 	SDKUnhook(client, SDKHook_SetTransmit, Hook_SetTransmit); 
-	
 	hide[client] = false;
 }
 
-YesHide(client)
+stock void YesHide(int client)
 {
 	SDKHook(client, SDKHook_SetTransmit, Hook_SetTransmit); 
-	
 	hide[client] = true;
 }
-
-

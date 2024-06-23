@@ -15,14 +15,13 @@
  * this program. If not, see http://www.gnu.org/licenses/.
  */
 
-#pragma semicolon 1
 #include <sourcemod>
 #include <sdktools>
 
-
-#define VERSION "4.0.3"
+#pragma semicolon 1
 #pragma newdecls required
 
+#define VERSION "4.1.0"
 #define MAX_ZONES 256
 
 int beamColorT[4] =  { 255, 0, 0, 255 };
@@ -30,48 +29,48 @@ int beamColorCT[4] =  { 0, 0, 255, 255 };
 int beamColorN[4] =  { 255, 255, 0, 255 };
 int beamColorM[4] =  { 0, 255, 0, 255 };
 
-int g_CurrentZoneTeam[MAXPLAYERS + 1];
-int g_CurrentZoneVis[MAXPLAYERS + 1];
+int g_CurrentZoneTeam[MAXPLAYERS + 1] = {0, ...};
+int g_CurrentZoneVis[MAXPLAYERS + 1] = {0, ...};
 char g_CurrentZoneName[MAXPLAYERS + 1][64];
+
 // VARIABLES
-Handle g_Zones = null;
+Handle g_Zones = INVALID_HANDLE;
 int g_Editing[MAXPLAYERS + 1] =  { 0, ... };
 float g_Positions[MAXPLAYERS + 1][2][3];
 int g_ClientSelectedZone[MAXPLAYERS + 1] =  { -1, ... };
-bool g_bFixName[MAXPLAYERS + 1];
-bool g_bMapStarted;
+bool g_bFixName[MAXPLAYERS + 1] = {false, ...};
+bool g_bMapStarted = false;
 EngineVersion g_Engine;
 
-int g_BeamSprite;
-int g_HaloSprite;
+int g_BeamSprite = 0;
+int g_HaloSprite = 0;
 
-Handle hOnClientEntry = null;
-Handle hOnClientLeave = null;
+Handle hOnClientEntry = INVALID_HANDLE;
+Handle hOnClientLeave = INVALID_HANDLE;
 
-
-enum struct g_eList {
+enum struct g_eList
+{
 	char liName[64];
 	bool liThis;
 }
 
-g_eList g_iZones[2048][MAX_ZONES]; // max zones = 256
+g_eList g_iZones[2048][MAX_ZONES];
 
+// CVARS
 
-// cvars
+ConVar cvar_filter = null;
+ConVar cvar_mode = null;
+ConVar cvar_checker = null;
+ConVar cvar_model = null;
 
-ConVar cvar_filter;
-ConVar cvar_mode;
-ConVar cvar_checker;
-ConVar cvar_model;
-
-bool g_bfilter;
-float checker;
-bool mode_plugin;
-char sModel[192];
+bool g_bfilter = false;
+float checker = 0.0;
+bool mode_plugin = false;
+char sModel[192] = "";
 
 Handle cvar_timer = INVALID_HANDLE;
 
-Handle hOnZoneCreated;
+Handle hOnZoneCreated = INVALID_HANDLE;
 
 // PLUGIN INFO
 public Plugin myinfo =
@@ -83,7 +82,8 @@ public Plugin myinfo =
 	url = "https://github.com/Franc1sco/DevZones"
 };
 
-public void OnPluginStart() {
+public void OnPluginStart()
+{
 	g_Engine = GetEngineVersion();
 
 	cvar_filter = CreateConVar("sm_devzones_filter", "1", "1 = Only allow valid alive clients to be detected in the native zones. 0 = Detect entities and all (you need to add more checkers in the third party plugins).");
@@ -112,11 +112,13 @@ public Action Event_PlayerSpawn(Event event, const char[] name, bool dontBroadca
 {
 	int client = GetClientOfUserId(GetEventInt(event, "userid"));
 	resetClient(client);
+	return Plugin_Continue;
 }
 
 public void OnEntityDestroyed(int entity)
 {
-	if (entity < 0 || entity > 2048)return;
+	if (entity < 0 || entity > 2048)
+		return;
 	
 	resetClient(entity);
 }
@@ -127,17 +129,20 @@ public void OnPluginEnd()
 	RemoveZones();
 }
 
-public void resetClient(int client) {
+public void resetClient(int client)
+{
 	for (int i = 0; i < MAX_ZONES; i++)
-	g_iZones[client][i].liThis = false;
+		g_iZones[client][i].liThis = false;
 }
 
-public void CVarChange(Handle convar_hndl, const char[] oldValue, const char[] newValue) {
+public void CVarChange(Handle convar_hndl, const char[] oldValue, const char[] newValue)
+{
 	GetCVars();
 }
 
 // Get int values of cvars if they has being changed
-public void GetCVars() {
+public void GetCVars()
+{
 	g_bfilter = GetConVarBool(cvar_filter);
 	mode_plugin = GetConVarBool(cvar_mode);
 	checker = GetConVarFloat(cvar_checker);
@@ -150,40 +155,43 @@ public void GetCVars() {
 	cvar_timer = CreateTimer(checker, BeamBoxAll, _, TIMER_REPEAT);
 }
 
-public void OnClientPostAdminCheck(int client) {
+public void OnClientPostAdminCheck(int client)
+{
 	g_ClientSelectedZone[client] = -1;
 	g_Editing[client] = 0;
 	g_bFixName[client] = false;
 	resetClient(client);
 }
 
-public Action Event_OnRoundStart(Handle event, const char[] name, bool dontBroadcast) {
+public Action Event_OnRoundStart(Handle event, const char[] name, bool dontBroadcast)
+{
 	if (mode_plugin)
 		RefreshZones();
+	return Plugin_Continue;
 }
 
-public int CreateZoneEntity(float fMins[3], float fMaxs[3], char sZoneName[64]) {
+public int CreateZoneEntity(float fMins[3], float fMaxs[3], char sZoneName[64])
+{
 	float fMiddle[3];
 	int iEnt = CreateEntityByName("trigger_multiple");
-	
+
 	Call_StartForward(hOnZoneCreated);
 	Call_PushString(sZoneName);
 	Call_Finish();
-	
+
 	DispatchKeyValue(iEnt, "spawnflags", "64");
 	Format(sZoneName, sizeof(sZoneName), "sm_devzone %s", sZoneName);
 	DispatchKeyValue(iEnt, "targetname", sZoneName);
 	DispatchKeyValue(iEnt, "wait", "0");
-	
+
 	DispatchSpawn(iEnt);
 	ActivateEntity(iEnt);
-	
+
 	GetMiddleOfABox(fMins, fMaxs, fMiddle);
-	
+
 	TeleportEntity(iEnt, fMiddle, NULL_VECTOR, NULL_VECTOR);
 	SetEntityModel(iEnt, sModel);
-	
-	
+
 	// Have the mins always be negative
 	fMins[0] = fMins[0] - fMiddle[0];
 	if (fMins[0] > 0.0)
@@ -220,17 +228,17 @@ public int CreateZoneEntity(float fMins[3], float fMaxs[3], char sZoneName[64]) 
 	return iEnt;
 }
 
-public void EntOut_OnStartTouch(const char[] output, int caller, int activator, float delay) {
+public void EntOut_OnStartTouch(const char[] output, int caller, int activator, float delay)
+{
 	// Ignore dead players
 	if (g_bfilter)
 		if (activator < 1 || activator > MaxClients || !IsClientInGame(activator) || !IsPlayerAlive(activator))
 		return;
-	
+
 	char sTargetName[256];
 	GetEntPropString(caller, Prop_Data, "m_iName", sTargetName, sizeof(sTargetName));
 	ReplaceString(sTargetName, sizeof(sTargetName), "sm_devzone ", "");
-	
-	
+
 	// entra
 	char nBuf[64];
 	Entity_GetGlobalName(caller, nBuf, sizeof(nBuf));
@@ -244,7 +252,8 @@ public void EntOut_OnStartTouch(const char[] output, int caller, int activator, 
 	Call_Finish();
 }
 
-public void EntOut_OnEndTouch(const char[] output, int caller, int activator, float delay) {
+public void EntOut_OnEndTouch(const char[] output, int caller, int activator, float delay)
+{
 	// Ignore dead players
 	if (g_bfilter)
 		if (activator < 1 || activator > MaxClients || !IsClientInGame(activator) || !IsPlayerAlive(activator))
@@ -269,8 +278,8 @@ public void EntOut_OnEndTouch(const char[] output, int caller, int activator, fl
 	
 }
 
-public void OnMapStart() {
-
+public void OnMapStart()
+{
 	g_bMapStarted = true;
 
 	for (int i = 1; i < MAXPLAYERS; i++)
@@ -284,20 +293,26 @@ public void OnMapStart() {
 	RefreshZones();
 }
 
-public void OnMapEnd() {
+public void OnMapEnd()
+{
 	SaveZones(0);
 	g_bMapStarted = false;
 }
 
-public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3], float angles[3], int &weapon) {
+public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3], float angles[3], int &weapon)
+{
 	BeamBox_OnPlayerRunCmd(client);
+	return Plugin_Continue;
 }
 
-public Action Command_CampZones(int client, int args) {
+public Action Command_CampZones(int client, int args)
+{
 	ZoneMenu(client);
+	return Plugin_Continue;
 }
 
-public void getZoneTeamColor(int team, int color[4]) {
+public void getZoneTeamColor(int team, int color[4])
+{
 	switch (team)
 	{
 		case 1:
@@ -319,8 +334,8 @@ public void getZoneTeamColor(int team, int color[4]) {
 	}
 }
 
-public void ReadZones() {
-	
+public void ReadZones()
+{
 	int size = GetArraySize(g_Zones);
 	if(size > 0)
 	{
@@ -351,8 +366,7 @@ public void ReadZones() {
 		Handle kv = CreateKeyValues("Zones");
 		KeyValuesToFile(kv, Path);
 	}
-	
-	
+
 	Handle kv = CreateKeyValues("Zones");
 	FileToKeyValues(kv, Path);
 	if (!KvGotoFirstSubKey(kv))
@@ -362,25 +376,26 @@ public void ReadZones() {
 	}
 	float pos1[3];
 	float pos2[3];
-	char nombre[64];
+	char name[64];
 	do
 	{
 		KvGetVector(kv, "cordinate_a", pos1);
 		KvGetVector(kv, "cordinate_b", pos2);
-		KvGetString(kv, "name", nombre, 64);
+		KvGetString(kv, "name", name, 64);
 		Handle trie = CreateTrie();
 		SetTrieArray(trie, "corda", pos1, 3);
 		SetTrieArray(trie, "cordb", pos2, 3);
 		SetTrieValue(trie, "team", KvGetNum(kv, "team", 0));
 		SetTrieValue(trie, "vis", KvGetNum(kv, "vis", 0));
-		SetTrieString(trie, "name", nombre);
+		SetTrieString(trie, "name", name);
 		PushArrayCell(g_Zones, trie);
 		//CloseHandle(trie);
 	} while (KvGotoNextKey(kv));
 	CloseHandle(kv);
 }
 
-public void SaveZones(int client) {
+public void SaveZones(int client)
+{
 	char Path[512];
 	char map[64];
 	GetCurrentMap(map, sizeof(map));
@@ -393,7 +408,7 @@ public void SaveZones(int client) {
 	char SectName[64];
 	int Team;
 	int Vis;
-	char nombre[64];
+	char name[64];
 	
 	int size = GetArraySize(g_Zones);
 	Handle kv = CreateKeyValues("Zones");
@@ -406,12 +421,12 @@ public void SaveZones(int client) {
 		GetTrieArray(trie, "cordb", pos2, sizeof(pos2));
 		GetTrieValue(trie, "team", Team);
 		GetTrieValue(trie, "vis", Vis);
-		GetTrieString(trie, "name", nombre, 64);
-		//Format(Nombre, 64, "Zone %i", i);
-		//SetTrieString(trie, "name", Nombre, true);
+		GetTrieString(trie, "name", name, 64);
+		//Format(name, 64, "Zone %i", i);
+		//SetTrieString(trie, "name", name, true);
 		
 		KvJumpToKey(kv, SectName, true);
-		KvSetString(kv, "name", nombre);
+		KvSetString(kv, "name", name);
 		KvSetVector(kv, "cordinate_a", pos1);
 		KvSetVector(kv, "cordinate_b", pos2);
 		KvSetNum(kv, "vis", Vis);
@@ -424,14 +439,16 @@ public void SaveZones(int client) {
 		PrintToChat(client, "All zones are saved in file.");
 }
 
-public bool TraceRayDontHitSelf(int entity, int mask, any data) {
+public bool TraceRayDontHitSelf(int entity, int mask, any data)
+{
 	if (entity == data)
 		return false;
 	return true;
 }
 
-public Action fnHookSay(int client, int args) {
-	if (!g_bFixName[client])return;
+public Action fnHookSay(int client, int args)
+{
+	if (!g_bFixName[client])return Plugin_Continue;
 	
 	char sArgs[192];
 	GetCmdArgString(sArgs, sizeof(sArgs));
@@ -444,13 +461,13 @@ public Action fnHookSay(int client, int args) {
 	if (strlen(sArgs) > 45)
 	{
 		PrintToChat(client, "the name is too long, try other name");
-		return;
+		return Plugin_Continue;
 	}
 	if (StrEqual(sArgs, "!cancel"))
 	{
 		PrintToChat(client, "Set name action canceled");
 		EditorMenu(client);
-		return;
+		return Plugin_Continue;
 	}
 	char ZoneId[64];
 	int size = GetArraySize(g_Zones);
@@ -461,7 +478,7 @@ public Action fnHookSay(int client, int args) {
 		if (StrEqual(ZoneId, sArgs))
 		{
 			PrintToChat(client, "The name already exist, write other name");
-			return;
+			return Plugin_Continue;
 		}
 	}
 	
@@ -469,9 +486,11 @@ public Action fnHookSay(int client, int args) {
 	PrintToChat(client, "Zone name set to %s", sArgs);
 	g_bFixName[client] = false;
 	EditorMenu(client);
+	return Plugin_Continue;
 }
 
-public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max) {
+public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
+{
 	hOnClientEntry = CreateGlobalForward("Zone_OnClientEntry", ET_Ignore, Param_Cell, Param_String);
 	hOnClientLeave = CreateGlobalForward("Zone_OnClientLeave", ET_Ignore, Param_Cell, Param_String);
 	hOnZoneCreated = CreateGlobalForward("Zone_OnCreated", ET_Ignore, Param_String);
@@ -491,7 +510,8 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	return APLRes_Success;
 }
 
-public int Native_InZone(Handle plugin, int argc) {
+public int Native_InZone(Handle plugin, int argc)
+{
 	char name[64];
 	GetNativeString(2, name, 64);
 	int client = GetNativeCell(1);
@@ -516,11 +536,13 @@ public int Native_InZone(Handle plugin, int argc) {
 	return false;
 }
 
-public int Native_getMostRecentActiveZone(Handle plugin, int argc) {
+public int Native_getMostRecentActiveZone(Handle plugin, int argc)
+{
 	int client = GetNativeCell(1);
 	
 	int size = GetArraySize(g_Zones);
-	for (int i = 0; i < size; ++i) {
+	for (int i = 0; i < size; ++i)
+	{
 		if (g_iZones[client][i].liThis) {
 			SetNativeString(2, g_iZones[client][i].liName, 64);
 			return true;
@@ -529,15 +551,16 @@ public int Native_getMostRecentActiveZone(Handle plugin, int argc) {
 	return false;
 }
 
-public int Native_GetZonePos(Handle plugin, int argc) {
+public int Native_GetZonePos(Handle plugin, int argc)
+{
 	char name[64];
 	char namezone[64];
 	float posA[3];
 	float posB[3];
-	
+
 	GetNativeString(1, name, 64);
 	bool sensitive = GetNativeCell(2);
-	
+
 	int size = GetArraySize(g_Zones);
 	if (size > 0)
 	{
@@ -561,7 +584,8 @@ public int Native_GetZonePos(Handle plugin, int argc) {
 	return false;
 }
 
-public int Native_GetZoneCord(Handle plugin, int argc) {
+public int Native_GetZoneCord(Handle plugin, int argc)
+{
 	char name[64];
 	char namezone[64];
 	float posA[3];
@@ -590,7 +614,8 @@ public int Native_GetZoneCord(Handle plugin, int argc) {
 	return false;
 }
 
-public int Native_ZoneExist(Handle plugin, int argc) {
+public int Native_ZoneExist(Handle plugin, int argc)
+{
 	char name[64];
 	char namezone[64];
 	
@@ -611,7 +636,8 @@ public int Native_ZoneExist(Handle plugin, int argc) {
 	return false;
 }
 
-public any Native_isPositionInZone(Handle plugin, int numParams) {
+public any Native_isPositionInZone(Handle plugin, int numParams)
+{
 	char zonename[64];
 	float pos[3];
 	GetNativeString(1, zonename, 64);
@@ -651,14 +677,16 @@ public any Native_isPositionInZone(Handle plugin, int numParams) {
 	return view_as<bool>(found > 0);
 }
 
-public void DrawBeamBox(int client) {
+public void DrawBeamBox(int client)
+{
 	int zColor[4];
 	getZoneTeamColor(g_CurrentZoneTeam[client], zColor);
 	TE_SendBeamBoxToClient(client, g_Positions[client][1], g_Positions[client][0], g_BeamSprite, g_HaloSprite, 0, 30, 1.0, 5.0, 5.0, 2, 1.0, zColor, 0);
 	CreateTimer(1.0, BeamBox, client, TIMER_REPEAT);
 }
 
-public Action BeamBox(Handle timer, any client) {
+public Action BeamBox(Handle timer, any client)
+{
 	if (IsClientInGame(client))
 	{
 		if (g_Editing[client] == 2)
@@ -672,14 +700,15 @@ public Action BeamBox(Handle timer, any client) {
 	return Plugin_Stop;
 }
 
-public Action BeamBoxAll(Handle timer, any data) {
+public Action BeamBoxAll(Handle timer, any data)
+{
 	int size = GetArraySize(g_Zones);
 	float posA[3];
 	float posB[3];
 	int zColor[4];
 	int Team;
 	int Vis;
-	char nombre[64];
+	char name[64];
 	for (int i = 0; i < size; ++i)
 	{
 		Handle trie = GetArrayCell(g_Zones, i);
@@ -687,7 +716,7 @@ public Action BeamBoxAll(Handle timer, any data) {
 		GetTrieArray(trie, "cordb", posB, sizeof(posB));
 		GetTrieValue(trie, "team", Team);
 		GetTrieValue(trie, "vis", Vis);
-		GetTrieString(trie, "name", nombre, 64);
+		GetTrieString(trie, "name", name, 64);
 		//CloseHandle(trie);
 		for (int p = 1; p <= MaxClients; p++)
 		{
@@ -708,7 +737,7 @@ public Action BeamBoxAll(Handle timer, any data) {
 						{
 							// entra
 							g_iZones[p][i].liThis = true;
-							Format(g_iZones[p][i].liName, 64, nombre);
+							Format(g_iZones[p][i].liName, 64, name);
 							Call_StartForward(hOnClientEntry);
 							Call_PushCell(p);
 							Call_PushString(g_iZones[p][i].liName);
@@ -721,7 +750,7 @@ public Action BeamBoxAll(Handle timer, any data) {
 						{
 							// sale
 							g_iZones[p][i].liThis = false;
-							Format(g_iZones[p][i].liName, 64, nombre);
+							Format(g_iZones[p][i].liName, 64, name);
 							Call_StartForward(hOnClientLeave);
 							Call_PushCell(p);
 							Call_PushString(g_iZones[p][i].liName);
@@ -735,7 +764,8 @@ public Action BeamBoxAll(Handle timer, any data) {
 	return Plugin_Continue;
 }
 
-public void BeamBox_OnPlayerRunCmd(int client) {
+public void BeamBox_OnPlayerRunCmd(int client)
+{
 	if (g_Editing[client] == 1 || g_Editing[client] == 3)
 	{
 		float pos[3];
@@ -761,7 +791,8 @@ public void BeamBox_OnPlayerRunCmd(int client) {
 	}
 }
 
-stock void TE_SendBeamBoxToClient(int client, float uppercorner[3], const float bottomcorner[3], int ModelIndex, int HaloIndex, int StartFrame, int FrameRate, float Life, float Width, float EndWidth, int FadeLength, float Amplitude, const int Color[4], int Speed) {
+stock void TE_SendBeamBoxToClient(int client, float uppercorner[3], const float bottomcorner[3], int ModelIndex, int HaloIndex, int StartFrame, int FrameRate, float Life, float Width, float EndWidth, int FadeLength, float Amplitude, const int Color[4], int Speed)
+{
 	// Create the additional corners of the box
 	float tc1[3];
 	AddVectors(tc1, uppercorner, tc1);
@@ -901,7 +932,8 @@ public void ZoneMenu(int client)
 	DisplayMenu(Menu2, client, MENU_TIME_FOREVER);
 }
 
-public int Handle_ZoneMenu(Handle tMenu, MenuAction action, int client, int item) {
+public int Handle_ZoneMenu(Handle tMenu, MenuAction action, int client, int item)
+{
 	switch (action)
 	{
 		case MenuAction_Select:
@@ -938,6 +970,7 @@ public int Handle_ZoneMenu(Handle tMenu, MenuAction action, int client, int item
 			CloseHandle(tMenu);
 		}
 	}
+	return 0;
 }
 
 public void ListZones(int client, MenuHandler handler)
@@ -967,7 +1000,8 @@ public void ListZones(int client, MenuHandler handler)
 	DisplayMenu(Menu2, client, MENU_TIME_FOREVER);
 }
 
-public void EditorMenu(int client) {
+public void EditorMenu(int client)
+{
 	if (g_Editing[client] == 3)
 	{
 		DrawBeamBox(client);
@@ -1038,7 +1072,8 @@ public void EditorMenu(int client) {
 	DisplayMenu(Menu2, client, MENU_TIME_FOREVER);
 }
 
-public int MenuHandler_Editor(Handle tMenu, MenuAction action, int client, int item) {
+public int MenuHandler_Editor(Handle tMenu, MenuAction action, int client, int item)
+{
 	switch (action)
 	{
 		case MenuAction_Select:
@@ -1199,13 +1234,15 @@ public int MenuHandler_Editor(Handle tMenu, MenuAction action, int client, int i
 			CloseHandle(tMenu);
 		}
 	}
+	return 0;
 }
 
 float g_AvaliableScales[5] =  { 1.0, 5.0, 10.0, 50.0, 100.0 };
 int g_ClientSelectedScale[MAXPLAYERS + 1];
 int g_ClientSelectedPoint[MAXPLAYERS + 1];
 
-public void ScaleMenu(int client) {
+public void ScaleMenu(int client)
+{
 	g_Editing[client] = 3;
 	Handle Menu2 = CreateMenu(MenuHandler_Scale);
 	SetMenuTitle(Menu2, "Stretch Zone");
@@ -1283,6 +1320,7 @@ public int MenuHandler_Scale(Handle tMenu, MenuAction action, int client, int it
 			CloseHandle(tMenu);
 		}
 	}
+	return 0;
 }
 
 public int MenuHandler_ZoneModify(Handle tMenu, MenuAction action, int client, int item)
@@ -1310,6 +1348,7 @@ public int MenuHandler_ZoneModify(Handle tMenu, MenuAction action, int client, i
 			CloseHandle(tMenu);
 		}
 	}
+	return 0;
 }
 
 public void GetClientSelectedZone(int client, float poses[2][3], int &team, int &vis)
@@ -1330,7 +1369,8 @@ public void GetClientSelectedZone(int client, float poses[2][3], int &team, int 
 	}
 }
 
-public void ClearZonesMenu(int client) {
+public void ClearZonesMenu(int client)
+{
 	Handle Menu2 = CreateMenu(MenuHandler_ClearZones);
 	SetMenuTitle(Menu2, "Are you sure, you want to clear all zones on this map?");
 	AddMenuItem(Menu2, "", "NO GO BACK!");
@@ -1359,10 +1399,11 @@ public int MenuHandler_ClearZones(Handle tMenu, MenuAction action, int client, i
 			CloseHandle(tMenu);
 		}
 	}
+	return 0;
 }
 
-
-stock void GetMiddleOfABox(const float vec1[3], const float vec2[3], float buffer[3]) {
+stock void GetMiddleOfABox(const float vec1[3], const float vec2[3], float buffer[3])
+{
 	float mid[3];
 	MakeVectorFromPoints(vec1, vec2, mid);
 	mid[0] = mid[0] / 2.0;
@@ -1371,21 +1412,23 @@ stock void GetMiddleOfABox(const float vec1[3], const float vec2[3], float buffe
 	AddVectors(vec1, mid, buffer);
 }
 
-stock void RefreshZones() {
+stock void RefreshZones()
+{
 	if (!g_bMapStarted)
 		return;
+
 	RemoveZones();
 	int size = GetArraySize(g_Zones);
 	float posA[3];
 	float posB[3];
-	char nombre[64];
+	char name[64];
 	for (int i = 0; i < size; ++i)
 	{
 		Handle trie = GetArrayCell(g_Zones, i);
 		GetTrieArray(trie, "corda", posA, sizeof(posA));
 		GetTrieArray(trie, "cordb", posB, sizeof(posB));
-		GetTrieString(trie, "name", nombre, 64);
-		int zone = CreateZoneEntity(posA, posB, nombre);
+		GetTrieString(trie, "name", name, 64);
+		int zone = CreateZoneEntity(posA, posB, name);
 		char id[8];
 		IntToString(i, id, sizeof(id));
 		Entity_SetGlobalName(zone, id);

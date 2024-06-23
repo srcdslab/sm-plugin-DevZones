@@ -1,18 +1,20 @@
-#pragma semicolon 1
 #include <sourcemod>
 #include <sdktools>
 #include <sdkhooks>
 #include <devzones>
 
-new bool:infiniteammo[MAXPLAYERS+1];
+#pragma semicolon 1
+#pragma newdecls required
 
-new activeOffset = -1;
-new clip1Offset = -1;
-new clip2Offset = -1;
-new secAmmoTypeOffset = -1;
-new priAmmoTypeOffset = -1;
+bool infiniteammo[MAXPLAYERS+1];
 
-public Plugin:myinfo =
+int activeOffset = -1;
+int clip1Offset = -1;
+int clip2Offset = -1;
+int secAmmoTypeOffset = -1;
+int priAmmoTypeOffset = -1;
+
+public Plugin myinfo =
 {
 	name = "SM DEV Zones - Infinite Ammo",
 	author = "Franc1sco franug",
@@ -21,7 +23,7 @@ public Plugin:myinfo =
 	url = "http://steamcommunity.com/id/franug"
 };
 
-public OnPluginStart()
+public void OnPluginStart()
 {
 	HookEvent("player_spawn", PlayerSpawn);
 	HookEvent("weapon_fire", EventWeaponFire);
@@ -35,20 +37,23 @@ public OnPluginStart()
 	secAmmoTypeOffset = FindSendPropInfo("CBaseCombatWeapon", "m_iSecondaryAmmoCount");
 }
 
-public Action:PlayerSpawn(Handle:event, const String:name[], bool:dontBroadcast)
+public Action PlayerSpawn(Handle event, const char[] name, bool dontBroadcast)
 {
-	new client = GetClientOfUserId(GetEventInt(event, "userid"));
+	int client = GetClientOfUserId(GetEventInt(event, "userid"));
 	infiniteammo[client] = false;
-	CreateTimer(4.0, Pasado, GetClientUserId(client));
+	CreateTimer(4.0, OnPostPlayerSpawn, GetClientUserId(client));
+	return Plugin_Continue;
 }
 
-public Action:Pasado(Handle:timer, any:userid)
+public Action OnPostPlayerSpawn(Handle timer, any userid)
 {
-	new client = GetClientOfUserId(userid);
-	if(client != 0 && IsClientInGame(client)) infiniteammo[client] = false;
+	int client = GetClientOfUserId(userid);
+	if (client != 0 && IsClientInGame(client))
+		infiniteammo[client] = false;
+	return Plugin_Continue;
 }
 
-public Zone_OnClientEntry(client, String:zone[])
+public void Zone_OnClientEntry(int client, const char[] zone)
 {
 	if(client < 1 || client > MaxClients || !IsClientInGame(client) ||!IsPlayerAlive(client)) 
 		return;
@@ -58,7 +63,7 @@ public Zone_OnClientEntry(client, String:zone[])
 	infiniteammo[client] = true;
 }
 
-public Zone_OnClientLeave(client, String:zone[])
+public void Zone_OnClientLeave(int client, const char[] zone)
 {
 	if(client < 1 || client > MaxClients || !IsClientInGame(client) ||!IsPlayerAlive(client)) 
 		return;
@@ -68,16 +73,18 @@ public Zone_OnClientLeave(client, String:zone[])
 	infiniteammo[client] = false;
 }
 
-public Action:EventWeaponFire(Handle:event, const String:name[], bool:dontBroadcast)
+public Action EventWeaponFire(Handle event, const char[] name, bool dontBroadcast)
 {
     // Get all required event info.
-	new client = GetClientOfUserId(GetEventInt(event, "userid"));
-	if(infiniteammo[client]) Client_ResetAmmo(client);
+	int client = GetClientOfUserId(GetEventInt(event, "userid"));
+	if (infiniteammo[client])
+		Client_ResetAmmo(client);
+	return Plugin_Continue;
 }
 
-public Client_ResetAmmo(client)
+public void Client_ResetAmmo(int client)
 {
-	new zomg = GetEntDataEnt2(client, activeOffset);
+	int zomg = GetEntDataEnt2(client, activeOffset);
 	if (clip1Offset != -1 && zomg != -1)
 		SetEntData(zomg, clip1Offset, GetEntData(zomg, clip1Offset, 4)+1, 4, true);
 	if (clip2Offset != -1 && zomg != -1)
@@ -85,9 +92,5 @@ public Client_ResetAmmo(client)
 	if (priAmmoTypeOffset != -1 && zomg != -1)
 		SetEntData(zomg, priAmmoTypeOffset, GetEntData(zomg, priAmmoTypeOffset, 4)+1, 4, true);
 	if (secAmmoTypeOffset != -1 && zomg != -1)
-		SetEntData(zomg, secAmmoTypeOffset, GetEntData(zomg, secAmmoTypeOffset, 4)+1, 4, true);
-		
+		SetEntData(zomg, secAmmoTypeOffset, GetEntData(zomg, secAmmoTypeOffset, 4)+1, 4, true);		
 }
-
-
-

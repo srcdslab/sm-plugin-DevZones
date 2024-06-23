@@ -1,12 +1,14 @@
-#pragma semicolon 1
 #include <sourcemod>
 #include <sdktools>
 #include <sdkhooks>
 #include <devzones>
 
-new bool:nodamage[MAXPLAYERS+1];
+#pragma semicolon 1
+#pragma newdecls required
 
-public Plugin:myinfo =
+bool nodamage[MAXPLAYERS+1];
+
+public Plugin myinfo =
 {
 	name = "SM DEV Zones - Jail Damage",
 	author = "Franc1sco franug",
@@ -15,57 +17,58 @@ public Plugin:myinfo =
 	url = "http://www.cola-team.es"
 };
 
-public OnPluginStart()
+public void OnPluginStart()
 {
 	HookEvent("player_spawn", PlayerSpawn);
 }
 
-public Action:PlayerSpawn(Handle:event, const String:name[], bool:dontBroadcast)
+public Action PlayerSpawn(Handle event, const char[] name, bool dontBroadcast)
 {
-	new client = GetClientOfUserId(GetEventInt(event, "userid"));
+	int client = GetClientOfUserId(GetEventInt(event, "userid"));
 	nodamage[client] = false;
 	CreateTimer(4.0, SpawnTimer, GetClientUserId(client));
+	return Plugin_Continue;
 }
 
-public Action:SpawnTimer(Handle:timer, any:userid)
+public Action SpawnTimer(Handle timer, any userid)
 {
-	new client = GetClientOfUserId(userid);
+	int client = GetClientOfUserId(userid);
 	if (client == 0 || !IsClientInGame(client))
-		return;
-		
+		return Plugin_Continue;
+
 	nodamage[client] = false;
-	
+	return Plugin_Continue;
 }
 
-public Zone_OnClientEntry(client, String:zone[])
+public void Zone_OnClientEntry(int client, const char[] zone)
 {
 	if(client < 1 || client > MaxClients || !IsClientInGame(client) ||!IsPlayerAlive(client)) 
 		return;
-		
+
 	if(StrContains(zone, "jail", false) != 0) return;
-	
+
 	nodamage[client] = true;
 }
 
-public Zone_OnClientLeave(client, String:zone[])
+public void Zone_OnClientLeave(int client, const char[] zone)
 {
 	if(client < 1 || client > MaxClients || !IsClientInGame(client) ||!IsPlayerAlive(client)) 
 		return;
-		
+
 	if(StrContains(zone, "jail", false) != 0) return;
-	
+
 	nodamage[client] = false;
 }
 
-public OnClientPutInServer(client)
+public void OnClientPutInServer(int client)
 {
 	SDKHook(client, SDKHook_OnTakeDamage, OnTakeDamage);
 }
 
-public Action:OnTakeDamage(client, &attacker, &inflictor, &Float:damage, &damagetype)
+public Action OnTakeDamage(int client, int &attacker, int &inflictor, float &damage, int &damagetype)
 {
 	if(!IsValidClient(attacker) || !IsValidClient(client)) return Plugin_Continue;
-	
+
 	if(nodamage[attacker] && nodamage[client])
 	{
 		return Plugin_Continue;
@@ -74,15 +77,14 @@ public Action:OnTakeDamage(client, &attacker, &inflictor, &Float:damage, &damage
 	{
 		return Plugin_Continue;
 	}
-	
+
 	PrintHintText(attacker, "You cant hurt players in this zone!");
 	return Plugin_Handled;
 }
 
-public IsValidClient( client ) 
-{ 
-    if ( !( 1 <= client <= MaxClients ) || !IsClientInGame(client) ) 
+public bool IsValidClient(int client)
+{
+    if (!( 1 <= client <= MaxClients ) || !IsClientInGame(client))
         return false; 
-     
     return true; 
 }
