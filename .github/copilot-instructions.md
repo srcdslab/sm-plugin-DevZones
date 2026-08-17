@@ -23,9 +23,9 @@ DevZones is a comprehensive zone management system for SourceMod, designed for S
 ## Technical Environment
 
 - **Language**: SourcePawn
-- **Platform**: SourceMod 1.11.0+ (uses 1.11.0-git6966 in CI)
-- **Build System**: SourceKnight (configured via `sourceknight.yaml`)
-- **Compiler**: SourcePawn compiler (spcomp) via SourceKnight
+- **Platform**: SourceMod 1.12.x (used in CI)
+- **Build System**: Native GitHub Actions (configured via `.github/workflows/ci.yml`)
+- **Compiler**: SourcePawn compiler (spcomp) via rumblefrog/setup-sp
 - **Dependencies**: 
   - SourceMod base includes
   - MultiColors plugin (for colored chat output)
@@ -34,12 +34,12 @@ DevZones is a comprehensive zone management system for SourceMod, designed for S
 ## Development Workflow
 
 ### Build Process
-1. **Local Development**: Use SourceKnight CLI for building
+1. **Local Development**: Use spcomp directly for building
    ```bash
-   # Build all plugins
-   sourceknight build
-   
-   # Output goes to /addons/sourcemod/plugins/
+   # Build a single plugin (from addons/sourcemod/scripting)
+   spcomp -i include -o ../plugins/devzones.smx devzones.sp
+
+   # Output goes to addons/sourcemod/plugins/
    ```
 
 2. **CI/CD**: Automated via GitHub Actions (`.github/workflows/ci.yml`)
@@ -151,7 +151,7 @@ Key natives available for extension development:
 1. Create new plugin file: `devzones_newtype.sp`
 2. Include devzones: `#include <devzones>`
 3. Register for zone events: Hook `Zone_OnClientEntry`/`Zone_OnClientLeave`
-4. Add to `sourceknight.yaml` targets list
+4. Add to the target list in `.github/workflows/ci.yml`
 5. Test zone behavior and cleanup
 
 ### Modifying Core Functionality
@@ -190,7 +190,7 @@ Key natives available for extension development:
 - **Extension Conflicts**: Verify extensions don't interfere with each other
 
 ### Build Issues
-- **SourceKnight Config**: Verify `sourceknight.yaml` dependencies
+- **CI Workflow**: Verify dependency clone/copy steps in `.github/workflows/ci.yml`
 - **Include Paths**: Ensure include files are in correct directories
 - **Version Compatibility**: Check SourceMod API compatibility
 
