@@ -13,7 +13,7 @@ public Plugin myinfo =
 	name = "SM DEV Zones - Jail Damage",
 	author = "Franc1sco franug",
 	description = "",
-	version = "2.0",
+	version = "2.0.1",
 	url = "http://www.cola-team.es"
 };
 
@@ -86,7 +86,7 @@ public Action OnTakeDamage(int client, int &attacker, int &inflictor, float &dam
 
 public bool IsValidClient(int client)
 {
-    if (!( 1 <= client <= MaxClients ) || !IsClientInGame(client))
-        return false; 
-    return true; 
+    if (client < 1 || client > MaxClients || !IsClientInGame(client))
+        return false;
+    return true;
 }

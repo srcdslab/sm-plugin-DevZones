@@ -11,7 +11,7 @@ public Plugin myinfo =
 	name = "SM DEV Zones - NoDamage",
 	author = "Franc1sco franug",
 	description = "",
-	version = "3.1",
+	version = "3.1.1",
 	url = "http://steamcommunity.com/id/franug"
 };
 
@@ -43,7 +43,7 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 
 public bool IsValidClient(int client)
 {
-    if (!( 1 <= client <= MaxClients ) || !IsClientInGame(client))
-        return false; 
-    return true; 
+    if (client < 1 || client > MaxClients || !IsClientInGame(client))
+        return false;
+    return true;
 }
