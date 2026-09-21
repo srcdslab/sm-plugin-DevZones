@@ -11,7 +11,7 @@ public Plugin myinfo =
 	name = "SM DEV Zones - NoDamage",
 	author = "Franc1sco franug",
 	description = "",
-	version = "3.1",
+	version = "3.1.1",
 	url = "http://steamcommunity.com/id/franug"
 };
 
