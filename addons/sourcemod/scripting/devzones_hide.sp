@@ -15,7 +15,7 @@ public Plugin myinfo =
 	name = "SM DEV Zones - Hide",
 	author = "Franc1sco franug",
 	description = "",
-	version = "2.0",
+	version = "2.1",
 	url = "http://www.zeuszombie.com/"
 };
 
@@ -30,16 +30,16 @@ public void OnClientDisconnect(int client)
 	hide[client] = false;
 }
 
-public Action Event_PlayerTeam(Handle event, const char[] name, bool dontBroadcast)
+public Action Event_PlayerTeam(Event event, const char[] name, bool dontBroadcast)
 {
-	int client = GetClientOfUserId(GetEventInt(event, "userid"));
-	team[client] = GetEventInt(event, "team");
+	int client = GetClientOfUserId(event.GetInt("userid"));
+	team[client] = event.GetInt("team");
 	return Plugin_Continue;
 }
 
-public Action PlayerSpawn(Handle event, const char[] name, bool dontBroadcast)
+public Action PlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 {
-	int client = GetClientOfUserId(GetEventInt(event, "userid"));
+	int client = GetClientOfUserId(event.GetInt("userid"));
 	if (hide[client])
 		NoHide(client);
 

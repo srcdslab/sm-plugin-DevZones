@@ -13,7 +13,7 @@ public Plugin myinfo =
 	name = "SM DEV Zones - Jail Damage",
 	author = "Franc1sco franug",
 	description = "",
-	version = "2.0.1",
+	version = "2.0.2",
 	url = "http://www.cola-team.es"
 };
 
@@ -22,9 +22,9 @@ public void OnPluginStart()
 	HookEvent("player_spawn", PlayerSpawn);
 }
 
-public Action PlayerSpawn(Handle event, const char[] name, bool dontBroadcast)
+public Action PlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 {
-	int client = GetClientOfUserId(GetEventInt(event, "userid"));
+	int client = GetClientOfUserId(event.GetInt("userid"));
 	nodamage[client] = false;
 	CreateTimer(4.0, SpawnTimer, GetClientUserId(client));
 	return Plugin_Continue;

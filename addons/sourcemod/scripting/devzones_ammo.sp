@@ -19,7 +19,7 @@ public Plugin myinfo =
 	name = "SM DEV Zones - Infinite Ammo",
 	author = "Franc1sco franug",
 	description = "",
-	version = "2.0",
+	version = "2.1",
 	url = "http://steamcommunity.com/id/franug"
 };
 
@@ -37,9 +37,9 @@ public void OnPluginStart()
 	secAmmoTypeOffset = FindSendPropInfo("CBaseCombatWeapon", "m_iSecondaryAmmoCount");
 }
 
-public Action PlayerSpawn(Handle event, const char[] name, bool dontBroadcast)
+public Action PlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 {
-	int client = GetClientOfUserId(GetEventInt(event, "userid"));
+	int client = GetClientOfUserId(event.GetInt("userid"));
 	infiniteammo[client] = false;
 	CreateTimer(4.0, OnPostPlayerSpawn, GetClientUserId(client));
 	return Plugin_Continue;
@@ -75,10 +75,10 @@ public void Zone_OnClientLeave(int client, const char[] zone)
 	infiniteammo[client] = false;
 }
 
-public Action EventWeaponFire(Handle event, const char[] name, bool dontBroadcast)
+public Action EventWeaponFire(Event event, const char[] name, bool dontBroadcast)
 {
     // Get all required event info.
-	int client = GetClientOfUserId(GetEventInt(event, "userid"));
+	int client = GetClientOfUserId(event.GetInt("userid"));
 	if (infiniteammo[client])
 		Client_ResetAmmo(client);
 	return Plugin_Continue;

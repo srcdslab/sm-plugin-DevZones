@@ -21,7 +21,7 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-#define VERSION "4.1.1"
+#define VERSION "4.1.2"
 #define MAX_ZONES 256
 
 int beamColorT[4] =  { 255, 0, 0, 255 };
@@ -34,7 +34,7 @@ int g_CurrentZoneVis[MAXPLAYERS + 1] = {0, ...};
 char g_CurrentZoneName[MAXPLAYERS + 1][64];
 
 // VARIABLES
-Handle g_Zones = INVALID_HANDLE;
+ArrayList g_Zones = null;
 int g_Editing[MAXPLAYERS + 1] =  { 0, ... };
 float g_Positions[MAXPLAYERS + 1][2][3];
 int g_ClientSelectedZone[MAXPLAYERS + 1] =  { -1, ... };
@@ -45,8 +45,8 @@ EngineVersion g_Engine;
 int g_BeamSprite = 0;
 int g_HaloSprite = 0;
 
-Handle hOnClientEntry = INVALID_HANDLE;
-Handle hOnClientLeave = INVALID_HANDLE;
+GlobalForward hOnClientEntry = null;
+GlobalForward hOnClientLeave = null;
 
 enum struct g_eList
 {
@@ -68,9 +68,9 @@ float checker = 0.0;
 bool mode_plugin = false;
 char sModel[192] = "";
 
-Handle cvar_timer = INVALID_HANDLE;
+Handle cvar_timer = null;
 
-Handle hOnZoneCreated = INVALID_HANDLE;
+GlobalForward hOnZoneCreated = null;
 
 // PLUGIN INFO
 public Plugin myinfo =
@@ -90,7 +90,7 @@ public void OnPluginStart()
 	cvar_mode = CreateConVar("sm_devzones_mode", "1", "0 = Use checks every X seconds for check if a player join or leave a zone, 1 = hook zone entities with OnStartTouch and OnEndTouch (less CPU consume)");
 	cvar_checker = CreateConVar("sm_devzones_checker", "5.0", "checks and beambox refreshs per second, low value = more precise but more CPU consume, More hight = less precise but less CPU consume");
 	cvar_model = CreateConVar("sm_devzones_model", "models/error.mdl", "Use a model for zone entity (IMPORTANT: change this value only on map start)");
-	g_Zones = CreateArray(256);
+	g_Zones = new ArrayList(256);
 	RegAdminCmd("sm_zones", Command_CampZones, ADMFLAG_CUSTOM6);
 	RegConsoleCmd("say", fnHookSay);
 	HookEventEx("round_start", Event_OnRoundStart);
@@ -100,17 +100,17 @@ public void OnPluginStart()
 	
 	GetCVars();
 	
-	HookConVarChange(cvar_filter, CVarChange);
-	HookConVarChange(cvar_checker, CVarChange);
-	HookConVarChange(cvar_mode, CVarChange);
-	HookConVarChange(cvar_model, CVarChange);
+	cvar_filter.AddChangeHook(CVarChange);
+	cvar_checker.AddChangeHook(CVarChange);
+	cvar_mode.AddChangeHook(CVarChange);
+	cvar_model.AddChangeHook(CVarChange);
 	
 }
 
 // fixes for Zone_IsClientInZone native
 public Action Event_PlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 {
-	int client = GetClientOfUserId(GetEventInt(event, "userid"));
+	int client = GetClientOfUserId(event.GetInt("userid"));
 	resetClient(client);
 	return Plugin_Continue;
 }
@@ -135,7 +135,7 @@ public void resetClient(int client)
 		g_iZones[client][i].liThis = false;
 }
 
-public void CVarChange(Handle convar_hndl, const char[] oldValue, const char[] newValue)
+public void CVarChange(ConVar convar_hndl, const char[] oldValue, const char[] newValue)
 {
 	GetCVars();
 }
@@ -143,14 +143,13 @@ public void CVarChange(Handle convar_hndl, const char[] oldValue, const char[] n
 // Get int values of cvars if they has being changed
 public void GetCVars()
 {
-	g_bfilter = GetConVarBool(cvar_filter);
-	mode_plugin = GetConVarBool(cvar_mode);
-	checker = GetConVarFloat(cvar_checker);
+	g_bfilter = cvar_filter.BoolValue;
+	mode_plugin = cvar_mode.BoolValue;
+	checker = cvar_checker.FloatValue;
 	cvar_model.GetString(sModel, 192);
 	
-	if (cvar_timer != INVALID_HANDLE) {
-		KillTimer(cvar_timer);
-		cvar_timer = INVALID_HANDLE;
+	if (cvar_timer != null) {
+		delete cvar_timer;
 	}
 	cvar_timer = CreateTimer(checker, BeamBoxAll, _, TIMER_REPEAT);
 }
@@ -163,7 +162,7 @@ public void OnClientPostAdminCheck(int client)
 	resetClient(client);
 }
 
-public Action Event_OnRoundStart(Handle event, const char[] name, bool dontBroadcast)
+public Action Event_OnRoundStart(Event event, const char[] name, bool dontBroadcast)
 {
 	if (mode_plugin)
 		RefreshZones();
@@ -336,15 +335,16 @@ public void getZoneTeamColor(int team, int color[4])
 
 public void ReadZones()
 {
-	int size = GetArraySize(g_Zones);
+	int size = g_Zones.Length;
 	if(size > 0)
 	{
 		for (int i = 0; i < size; ++i)
 		{
-			CloseHandle(GetArrayCell(g_Zones, i));
+			StringMap zone = g_Zones.Get(i);
+			delete zone;
 		}
 	}
-	ClearArray(g_Zones);
+	g_Zones.Clear();
 	char Path[512];
 	BuildPath(Path_SM, Path, sizeof(Path), "configs/dev_zones");
 	if (!DirExists(Path))
@@ -361,15 +361,15 @@ public void ReadZones()
 	BuildPath(Path_SM, Path, sizeof(Path), "configs/dev_zones/%s.zones.txt", map);
 	if (!FileExists(Path))
 	{
-		//Handle file = OpenFile(Path, "w");
+		//File file = OpenFile(Path, "w");
 		//CloseHandle(file);
-		Handle kv = CreateKeyValues("Zones");
-		KeyValuesToFile(kv, Path);
+		KeyValues kv = new KeyValues("Zones");
+		kv.ExportToFile(Path);
 	}
 
-	Handle kv = CreateKeyValues("Zones");
-	FileToKeyValues(kv, Path);
-	if (!KvGotoFirstSubKey(kv))
+	KeyValues kv = new KeyValues("Zones");
+	kv.ImportFromFile(Path);
+	if (!kv.GotoFirstSubKey())
 	{
 		PrintToServer("[ERROR] Config file is corrupted: %s", Path);
 		return;
@@ -379,19 +379,19 @@ public void ReadZones()
 	char name[64];
 	do
 	{
-		KvGetVector(kv, "cordinate_a", pos1);
-		KvGetVector(kv, "cordinate_b", pos2);
-		KvGetString(kv, "name", name, 64);
-		Handle trie = CreateTrie();
-		SetTrieArray(trie, "corda", pos1, 3);
-		SetTrieArray(trie, "cordb", pos2, 3);
-		SetTrieValue(trie, "team", KvGetNum(kv, "team", 0));
-		SetTrieValue(trie, "vis", KvGetNum(kv, "vis", 0));
-		SetTrieString(trie, "name", name);
-		PushArrayCell(g_Zones, trie);
+		kv.GetVector("cordinate_a", pos1);
+		kv.GetVector("cordinate_b", pos2);
+		kv.GetString("name", name, 64);
+		StringMap trie = new StringMap();
+		trie.SetArray("corda", pos1, 3);
+		trie.SetArray("cordb", pos2, 3);
+		trie.SetValue("team", kv.GetNum("team", 0));
+		trie.SetValue("vis", kv.GetNum("vis", 0));
+		trie.SetString("name", name);
+		g_Zones.Push(trie);
 		//CloseHandle(trie);
-	} while (KvGotoNextKey(kv));
-	CloseHandle(kv);
+	} while (kv.GotoNextKey());
+	delete kv;
 }
 
 public void SaveZones(int client)
@@ -401,8 +401,8 @@ public void SaveZones(int client)
 	GetCurrentMap(map, sizeof(map));
 	StringToLowerCase(map);
 	BuildPath(Path_SM, Path, sizeof(Path), "configs/dev_zones/%s.zones.txt", map);
-	Handle file = OpenFile(Path, "w+");
-	CloseHandle(file);
+	File file = OpenFile(Path, "w+");
+	delete file;
 	float pos1[3];
 	float pos2[3];
 	char SectName[64];
@@ -410,31 +410,31 @@ public void SaveZones(int client)
 	int Vis;
 	char name[64];
 	
-	int size = GetArraySize(g_Zones);
-	Handle kv = CreateKeyValues("Zones");
+	int size = g_Zones.Length;
+	KeyValues kv = new KeyValues("Zones");
 	for (int i = 0; i < size; ++i)
 	{
 		IntToString(i, SectName, sizeof(SectName));
 		
-		Handle trie = GetArrayCell(g_Zones, i);
-		GetTrieArray(trie, "corda", pos1, sizeof(pos1));
-		GetTrieArray(trie, "cordb", pos2, sizeof(pos2));
-		GetTrieValue(trie, "team", Team);
-		GetTrieValue(trie, "vis", Vis);
-		GetTrieString(trie, "name", name, 64);
+		StringMap trie = g_Zones.Get(i);
+		trie.GetArray("corda", pos1, sizeof(pos1));
+		trie.GetArray("cordb", pos2, sizeof(pos2));
+		trie.GetValue("team", Team);
+		trie.GetValue("vis", Vis);
+		trie.GetString("name", name, 64);
 		//Format(name, 64, "Zone %i", i);
 		//SetTrieString(trie, "name", name, true);
 		
-		KvJumpToKey(kv, SectName, true);
-		KvSetString(kv, "name", name);
-		KvSetVector(kv, "cordinate_a", pos1);
-		KvSetVector(kv, "cordinate_b", pos2);
-		KvSetNum(kv, "vis", Vis);
-		KvSetNum(kv, "team", Team);
-		KvGoBack(kv);
+		kv.JumpToKey(SectName, true);
+		kv.SetString("name", name);
+		kv.SetVector("cordinate_a", pos1);
+		kv.SetVector("cordinate_b", pos2);
+		kv.SetNum("vis", Vis);
+		kv.SetNum("team", Team);
+		kv.GoBack();
 	}
-	KeyValuesToFile(kv, Path);
-	CloseHandle(kv);
+	kv.ExportToFile(Path);
+	delete kv;
 	if (client != 0)
 		PrintToChat(client, "All zones are saved in file.");
 }
@@ -470,11 +470,11 @@ public Action fnHookSay(int client, int args)
 		return Plugin_Continue;
 	}
 	char ZoneId[64];
-	int size = GetArraySize(g_Zones);
+	int size = g_Zones.Length;
 	for (int i = 0; i < size; ++i)
 	{
-		Handle trie = GetArrayCell(g_Zones, i);
-		GetTrieString(trie, "name", ZoneId, 64);
+		StringMap trie = g_Zones.Get(i);
+		trie.GetString("name", ZoneId, 64);
 		if (strcmp(ZoneId, sArgs, false) == 0)
 		{
 			PrintToChat(client, "The name already exist, write other name");
@@ -491,9 +491,9 @@ public Action fnHookSay(int client, int args)
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
-	hOnClientEntry = CreateGlobalForward("Zone_OnClientEntry", ET_Ignore, Param_Cell, Param_String);
-	hOnClientLeave = CreateGlobalForward("Zone_OnClientLeave", ET_Ignore, Param_Cell, Param_String);
-	hOnZoneCreated = CreateGlobalForward("Zone_OnCreated", ET_Ignore, Param_String);
+	hOnClientEntry = new GlobalForward("Zone_OnClientEntry", ET_Ignore, Param_Cell, Param_String);
+	hOnClientLeave = new GlobalForward("Zone_OnClientLeave", ET_Ignore, Param_Cell, Param_String);
+	hOnZoneCreated = new GlobalForward("Zone_OnCreated", ET_Ignore, Param_String);
 	CreateNative("Zone_IsClientInZone", Native_InZone);
 	CreateNative("Zone_GetZonePosition", Native_GetZonePos);
 	CreateNative("Zone_GetZoneCord", Native_GetZoneCord);
@@ -518,7 +518,7 @@ public int Native_InZone(Handle plugin, int argc)
 	bool same = GetNativeCell(3);
 	bool sensitive = GetNativeCell(4);
 	
-	int size = GetArraySize(g_Zones);
+	int size = g_Zones.Length;
 	for (int i = 0; i < size; ++i)
 	{
 		if (same)
@@ -540,7 +540,7 @@ public int Native_getMostRecentActiveZone(Handle plugin, int argc)
 {
 	int client = GetNativeCell(1);
 	
-	int size = GetArraySize(g_Zones);
+	int size = g_Zones.Length;
 	for (int i = 0; i < size; ++i)
 	{
 		if (g_iZones[client][i].liThis) {
@@ -561,16 +561,16 @@ public int Native_GetZonePos(Handle plugin, int argc)
 	GetNativeString(1, name, 64);
 	bool sensitive = GetNativeCell(2);
 
-	int size = GetArraySize(g_Zones);
+	int size = g_Zones.Length;
 	if (size > 0)
 	{
 		for (int i = 0; i < size; ++i)
 		{
-			GetTrieString(GetArrayCell(g_Zones, i), "name", namezone, 64);
+			view_as<StringMap>(g_Zones.Get(i)).GetString("name", namezone, 64);
 			if (strcmp(name, namezone, sensitive) == 0)
 			{
-				GetTrieArray(GetArrayCell(g_Zones, i), "corda", posA, sizeof(posA));
-				GetTrieArray(GetArrayCell(g_Zones, i), "cordb", posB, sizeof(posB));
+				view_as<StringMap>(g_Zones.Get(i)).GetArray("corda", posA, sizeof(posA));
+				view_as<StringMap>(g_Zones.Get(i)).GetArray("cordb", posB, sizeof(posB));
 				float ZonePos[3];
 				AddVectors(posA, posB, ZonePos);
 				ZonePos[0] /= 2.0;
@@ -594,16 +594,16 @@ public int Native_GetZoneCord(Handle plugin, int argc)
 	GetNativeString(1, name, 64);
 	bool sensitive = GetNativeCell(2);
 	
-	int size = GetArraySize(g_Zones);
+	int size = g_Zones.Length;
 	if (size > 0)
 	{
 		for (int i = 0; i < size; ++i)
 		{
-			GetTrieString(GetArrayCell(g_Zones, i), "name", namezone, 64);
+			view_as<StringMap>(g_Zones.Get(i)).GetString("name", namezone, 64);
 			if (strcmp(name, namezone, sensitive) == 0)
 			{
-				GetTrieArray(GetArrayCell(g_Zones, i), "corda", posA, sizeof(posA));
-				GetTrieArray(GetArrayCell(g_Zones, i), "cordb", posB, sizeof(posB));
+				view_as<StringMap>(g_Zones.Get(i)).GetArray("corda", posA, sizeof(posA));
+				view_as<StringMap>(g_Zones.Get(i)).GetArray("cordb", posB, sizeof(posB));
 				
 				SetNativeArray(3, posA, 3);
 				SetNativeArray(4, posB, 3);
@@ -623,12 +623,12 @@ public int Native_ZoneExist(Handle plugin, int argc)
 	bool same = GetNativeCell(2);
 	bool sensitive = GetNativeCell(3);
 	
-	int size = GetArraySize(g_Zones);
+	int size = g_Zones.Length;
 	if (size > 0)
 	{
 		for (int i = 0; i < size; ++i)
 		{
-			GetTrieString(GetArrayCell(g_Zones, i), "name", namezone, 64);
+			view_as<StringMap>(g_Zones.Get(i)).GetString("name", namezone, 64);
 			if (same && strcmp(name, namezone, sensitive) == 0)
 				return true;
 			else if (StrContains(name, namezone, sensitive) == 0)
@@ -652,17 +652,17 @@ public any Native_isPositionInZone(Handle plugin, int numParams)
 	
 	int found = 0;
 	
-	int size = GetArraySize(g_Zones);
+	int size = g_Zones.Length;
 	if (size > 0)
 	{
 		for (int i = 0; i < size; ++i)
 		{
 			char name[64];
-			GetTrieString(GetArrayCell(g_Zones, i), "name", name, sizeof(name));
+			view_as<StringMap>(g_Zones.Get(i)).GetString("name", name, sizeof(name));
 			float posA[3];
 			float posB[3];
-			GetTrieArray(GetArrayCell(g_Zones, i), "corda", posA, sizeof(posA));
-			GetTrieArray(GetArrayCell(g_Zones, i), "cordb", posB, sizeof(posB));
+			view_as<StringMap>(g_Zones.Get(i)).GetArray("corda", posA, sizeof(posA));
+			view_as<StringMap>(g_Zones.Get(i)).GetArray("cordb", posB, sizeof(posB));
 
 			if (same)
 			{
@@ -704,7 +704,7 @@ public Action BeamBox(Handle timer, any client)
 
 public Action BeamBoxAll(Handle timer, any data)
 {
-	int size = GetArraySize(g_Zones);
+	int size = g_Zones.Length;
 	float posA[3];
 	float posB[3];
 	int zColor[4];
@@ -713,12 +713,12 @@ public Action BeamBoxAll(Handle timer, any data)
 	char name[64];
 	for (int i = 0; i < size; ++i)
 	{
-		Handle trie = GetArrayCell(g_Zones, i);
-		GetTrieArray(trie, "corda", posA, sizeof(posA));
-		GetTrieArray(trie, "cordb", posB, sizeof(posB));
-		GetTrieValue(trie, "team", Team);
-		GetTrieValue(trie, "vis", Vis);
-		GetTrieString(trie, "name", name, 64);
+		StringMap trie = g_Zones.Get(i);
+		trie.GetArray("corda", posA, sizeof(posA));
+		trie.GetArray("cordb", posB, sizeof(posB));
+		trie.GetValue("team", Team);
+		trie.GetValue("vis", Vis);
+		trie.GetString("name", name, 64);
 		//CloseHandle(trie);
 		for (int p = 1; p <= MaxClients; p++)
 		{
@@ -923,18 +923,18 @@ public void ZoneMenu(int client)
 {
 	g_ClientSelectedZone[client] = -1;
 	g_Editing[client] = 0;
-	Handle Menu2 = CreateMenu(Handle_ZoneMenu);
-	SetMenuTitle(Menu2, "Zones");
-	AddMenuItem(Menu2, "", "Create Zone");
-	AddMenuItem(Menu2, "", "Edit Zones");
-	AddMenuItem(Menu2, "", "Save Zones");
-	AddMenuItem(Menu2, "", "Reload Zones");
-	AddMenuItem(Menu2, "", "Clear Zones");
-	SetMenuExitBackButton(Menu2, true);
-	DisplayMenu(Menu2, client, MENU_TIME_FOREVER);
+	Menu Menu2 = new Menu(Handle_ZoneMenu);
+	Menu2.SetTitle("Zones");
+	Menu2.AddItem("", "Create Zone");
+	Menu2.AddItem("", "Edit Zones");
+	Menu2.AddItem("", "Save Zones");
+	Menu2.AddItem("", "Reload Zones");
+	Menu2.AddItem("", "Clear Zones");
+	Menu2.ExitBackButton = true;
+	Menu2.Display(client, MENU_TIME_FOREVER);
 }
 
-public int Handle_ZoneMenu(Handle tMenu, MenuAction action, int client, int item)
+public int Handle_ZoneMenu(Menu tMenu, MenuAction action, int client, int item)
 {
 	switch (action)
 	{
@@ -969,7 +969,7 @@ public int Handle_ZoneMenu(Handle tMenu, MenuAction action, int client, int item
 		}
 		case MenuAction_End:
 		{
-			CloseHandle(tMenu);
+			delete tMenu;
 		}
 	}
 	return 0;
@@ -977,29 +977,29 @@ public int Handle_ZoneMenu(Handle tMenu, MenuAction action, int client, int item
 
 public void ListZones(int client, MenuHandler handler)
 {
-	Handle Menu2 = CreateMenu(handler);
-	SetMenuTitle(Menu2, "Avaliable Zones");
+	Menu Menu2 = new Menu(handler);
+	Menu2.SetTitle("Avaliable Zones");
 	
 	char ZoneName[256];
 	char ZoneId[64];
 	char Id[64];
 	int TeamId;
-	int size = GetArraySize(g_Zones);
+	int size = g_Zones.Length;
 	if (size > 0)
 	{
 		for (int i = 0; i < size; ++i)
 		{
-			GetTrieValue(GetArrayCell(g_Zones, i), "team", TeamId);
-			GetTrieString(GetArrayCell(g_Zones, i), "name", ZoneId, 64);
+			view_as<StringMap>(g_Zones.Get(i)).GetValue("team", TeamId);
+			view_as<StringMap>(g_Zones.Get(i)).GetString("name", ZoneId, 64);
 			IntToString(i, Id, sizeof(Id));
 			Format(ZoneName, sizeof(ZoneName), ZoneId);
-			AddMenuItem(Menu2, Id, ZoneId);
+			Menu2.AddItem(Id, ZoneId);
 		}
 	} else {
-		AddMenuItem(Menu2, "", "No zones are avaliable", ITEMDRAW_DISABLED);
+		Menu2.AddItem("", "No zones are avaliable", ITEMDRAW_DISABLED);
 	}
-	SetMenuExitBackButton(Menu2, true);
-	DisplayMenu(Menu2, client, MENU_TIME_FOREVER);
+	Menu2.ExitBackButton = true;
+	Menu2.Display(client, MENU_TIME_FOREVER);
 }
 
 public void EditorMenu(int client)
@@ -1009,72 +1009,72 @@ public void EditorMenu(int client)
 		DrawBeamBox(client);
 		g_Editing[client] = 2;
 	}
-	Handle Menu2 = CreateMenu(MenuHandler_Editor);
+	Menu Menu2 = new Menu(MenuHandler_Editor);
 	if (g_ClientSelectedZone[client] != -1)
-		SetMenuTitle(Menu2, "Zone Editor (MODIFY)");
+		Menu2.SetTitle("Zone Editor (MODIFY)");
 	else
-		SetMenuTitle(Menu2, "Zone Editor");
+		Menu2.SetTitle("Zone Editor");
 	
 	if (g_Editing[client] == 0)
-		AddMenuItem(Menu2, "", "Start Zone");
+		Menu2.AddItem("", "Start Zone");
 	else
-		AddMenuItem(Menu2, "", "Restart Zone");
+		Menu2.AddItem("", "Restart Zone");
 	
 	if (g_Editing[client] > 0)
 	{
-		AddMenuItem(Menu2, "", "Set Zone name");
+		Menu2.AddItem("", "Set Zone name");
 		if (g_Editing[client] == 2)
-			AddMenuItem(Menu2, "", "Continue Editing");
+			Menu2.AddItem("", "Continue Editing");
 		else
-			AddMenuItem(Menu2, "", "Pause Editing");
-		AddMenuItem(Menu2, "", "Cancel Zone");
-		AddMenuItem(Menu2, "", "Save Zone");
+			Menu2.AddItem("", "Pause Editing");
+		Menu2.AddItem("", "Cancel Zone");
+		Menu2.AddItem("", "Save Zone");
 		switch (g_CurrentZoneTeam[client])
 		{
 			case 0:
 			{
-				AddMenuItem(Menu2, "", "Set Zone Yellow");
+				Menu2.AddItem("", "Set Zone Yellow");
 			}
 			case 1:
 			{
-				AddMenuItem(Menu2, "", "Set Zone Green");
+				Menu2.AddItem("", "Set Zone Green");
 			}
 			case 2:
 			{
-				AddMenuItem(Menu2, "", "Set Zone Red");
+				Menu2.AddItem("", "Set Zone Red");
 			}
 			case 3:
 			{
-				AddMenuItem(Menu2, "", "Set Zone Blue");
+				Menu2.AddItem("", "Set Zone Blue");
 			}
 		}
-		AddMenuItem(Menu2, "", "Go to Zone");
-		AddMenuItem(Menu2, "", "Stretch Zone");
+		Menu2.AddItem("", "Go to Zone");
+		Menu2.AddItem("", "Stretch Zone");
 		switch (g_CurrentZoneVis[client])
 		{
 			case 0:
 			{
-				AddMenuItem(Menu2, "", "Visibility: No One");
+				Menu2.AddItem("", "Visibility: No One");
 			}
 			case 1:
 			{
-				AddMenuItem(Menu2, "", "Visibility: All");
+				Menu2.AddItem("", "Visibility: All");
 			}
 			case 2:
 			{
-				AddMenuItem(Menu2, "", "Visibility: T");
+				Menu2.AddItem("", "Visibility: T");
 			}
 			case 3:
 			{
-				AddMenuItem(Menu2, "", "Visibility: CT");
+				Menu2.AddItem("", "Visibility: CT");
 			}
 		}
 	}
-	SetMenuExitBackButton(Menu2, true);
-	DisplayMenu(Menu2, client, MENU_TIME_FOREVER);
+	Menu2.ExitBackButton = true;
+	Menu2.Display(client, MENU_TIME_FOREVER);
 }
 
-public int MenuHandler_Editor(Handle tMenu, MenuAction action, int client, int item)
+public int MenuHandler_Editor(Menu tMenu, MenuAction action, int client, int item)
 {
 	switch (action)
 	{
@@ -1117,7 +1117,7 @@ public int MenuHandler_Editor(Handle tMenu, MenuAction action, int client, int i
 				{
 					// Delete
 					if (g_ClientSelectedZone[client] != -1)
-						RemoveFromArray(g_Zones, g_ClientSelectedZone[client]);
+						g_Zones.Erase(g_ClientSelectedZone[client]);
 					g_Editing[client] = 0;
 					g_ClientSelectedZone[client] = -1;
 					ZoneMenu(client);
@@ -1128,25 +1128,25 @@ public int MenuHandler_Editor(Handle tMenu, MenuAction action, int client, int i
 					
 					// Save
 					g_Editing[client] = 2;
-					Handle trie = CreateTrie();
-					SetTrieArray(trie, "corda", g_Positions[client][0], 3);
-					SetTrieArray(trie, "cordb", g_Positions[client][1], 3);
-					SetTrieValue(trie, "team", g_CurrentZoneTeam[client]);
-					SetTrieValue(trie, "vis", g_CurrentZoneVis[client]);
+					StringMap trie = new StringMap();
+					trie.SetArray("corda", g_Positions[client][0], 3);
+					trie.SetArray("cordb", g_Positions[client][1], 3);
+					trie.SetValue("team", g_CurrentZoneTeam[client]);
+					trie.SetValue("vis", g_CurrentZoneVis[client]);
 					
 					
 					
 					if (g_ClientSelectedZone[client] != -1)
 					{
-						SetTrieString(trie, "name", g_CurrentZoneName[client]);
-						SetArrayCell(g_Zones, g_ClientSelectedZone[client], trie);
+						trie.SetString("name", g_CurrentZoneName[client]);
+						g_Zones.Set(g_ClientSelectedZone[client], trie);
 						
 					}
 					else
 					{
-						Format(g_CurrentZoneName[client], 64, "Zone %i", GetArraySize(g_Zones) + 1);
-						SetTrieString(trie, "name", g_CurrentZoneName[client]);
-						PushArrayCell(g_Zones, trie);
+						Format(g_CurrentZoneName[client], 64, "Zone %i", g_Zones.Length + 1);
+						trie.SetString("name", g_CurrentZoneName[client]);
+						g_Zones.Push(trie);
 					}
 					//CloseHandle(trie);
 					PrintToChat(client, "Zone saved");
@@ -1233,7 +1233,7 @@ public int MenuHandler_Editor(Handle tMenu, MenuAction action, int client, int i
 		}
 		case MenuAction_End:
 		{
-			CloseHandle(tMenu);
+			delete tMenu;
 		}
 	}
 	return 0;
@@ -1246,26 +1246,26 @@ int g_ClientSelectedPoint[MAXPLAYERS + 1];
 public void ScaleMenu(int client)
 {
 	g_Editing[client] = 3;
-	Handle Menu2 = CreateMenu(MenuHandler_Scale);
-	SetMenuTitle(Menu2, "Stretch Zone");
+	Menu Menu2 = new Menu(MenuHandler_Scale);
+	Menu2.SetTitle("Stretch Zone");
 	if (g_ClientSelectedPoint[client] == 1)
-		AddMenuItem(Menu2, "", "Point B");
+		Menu2.AddItem("", "Point B");
 	else
-		AddMenuItem(Menu2, "", "Point A");
-	AddMenuItem(Menu2, "", "+ Width");
-	AddMenuItem(Menu2, "", "- Width");
-	AddMenuItem(Menu2, "", "+ Height");
-	AddMenuItem(Menu2, "", "- Height");
-	AddMenuItem(Menu2, "", "+ Length");
-	AddMenuItem(Menu2, "", "- Length");
+		Menu2.AddItem("", "Point A");
+	Menu2.AddItem("", "+ Width");
+	Menu2.AddItem("", "- Width");
+	Menu2.AddItem("", "+ Height");
+	Menu2.AddItem("", "- Height");
+	Menu2.AddItem("", "+ Length");
+	Menu2.AddItem("", "- Length");
 	char ScaleSize[128];
 	Format(ScaleSize, sizeof(ScaleSize), "Scale Size %f", g_AvaliableScales[g_ClientSelectedScale[client]]);
-	AddMenuItem(Menu2, "", ScaleSize);
-	SetMenuExitBackButton(Menu2, true);
-	DisplayMenu(Menu2, client, MENU_TIME_FOREVER);
+	Menu2.AddItem("", ScaleSize);
+	Menu2.ExitBackButton = true;
+	Menu2.Display(client, MENU_TIME_FOREVER);
 }
 
-public int MenuHandler_Scale(Handle tMenu, MenuAction action, int client, int item)
+public int MenuHandler_Scale(Menu tMenu, MenuAction action, int client, int item)
 {
 	switch (action)
 	{
@@ -1319,20 +1319,20 @@ public int MenuHandler_Scale(Handle tMenu, MenuAction action, int client, int it
 		}
 		case MenuAction_End:
 		{
-			CloseHandle(tMenu);
+			delete tMenu;
 		}
 	}
 	return 0;
 }
 
-public int MenuHandler_ZoneModify(Handle tMenu, MenuAction action, int client, int item)
+public int MenuHandler_ZoneModify(Menu tMenu, MenuAction action, int client, int item)
 {
 	switch (action)
 	{
 		case MenuAction_Select:
 		{
 			char aID[64];
-			GetMenuItem(tMenu, item, aID, sizeof(aID));
+			tMenu.GetItem(item, aID, sizeof(aID));
 			g_ClientSelectedZone[client] = StringToInt(aID);
 			DrawBeamBox(client);
 			g_Editing[client] = 2;
@@ -1347,7 +1347,7 @@ public int MenuHandler_ZoneModify(Handle tMenu, MenuAction action, int client, i
 		}
 		case MenuAction_End:
 		{
-			CloseHandle(tMenu);
+			delete tMenu;
 		}
 	}
 	return 0;
@@ -1359,12 +1359,12 @@ public void GetClientSelectedZone(int client, float poses[2][3], int &team, int 
 	float posB[3];
 	if (g_ClientSelectedZone[client] != -1)
 	{
-		Handle trie = GetArrayCell(g_Zones, g_ClientSelectedZone[client]);
-		GetTrieArray(trie, "corda", posA, sizeof(posA));
-		GetTrieArray(trie, "cordb", posB, sizeof(posB));
-		GetTrieValue(trie, "team", team);
-		GetTrieValue(trie, "vis", vis);
-		GetTrieString(trie, "name", g_CurrentZoneName[client], 64);
+		StringMap trie = g_Zones.Get(g_ClientSelectedZone[client]);
+		trie.GetArray("corda", posA, sizeof(posA));
+		trie.GetArray("cordb", posB, sizeof(posB));
+		trie.GetValue("team", team);
+		trie.GetValue("vis", vis);
+		trie.GetString("name", g_CurrentZoneName[client], 64);
 		//CloseHandle(trie);
 		poses[0] = posA;
 		poses[1] = posB;
@@ -1373,15 +1373,15 @@ public void GetClientSelectedZone(int client, float poses[2][3], int &team, int 
 
 public void ClearZonesMenu(int client)
 {
-	Handle Menu2 = CreateMenu(MenuHandler_ClearZones);
-	SetMenuTitle(Menu2, "Are you sure, you want to clear all zones on this map?");
-	AddMenuItem(Menu2, "", "NO GO BACK!");
-	AddMenuItem(Menu2, "", "NO GO BACK!");
-	AddMenuItem(Menu2, "", "YES! DO IT!");
-	DisplayMenu(Menu2, client, 20);
+	Menu Menu2 = new Menu(MenuHandler_ClearZones);
+	Menu2.SetTitle("Are you sure, you want to clear all zones on this map?");
+	Menu2.AddItem("", "NO GO BACK!");
+	Menu2.AddItem("", "NO GO BACK!");
+	Menu2.AddItem("", "YES! DO IT!");
+	Menu2.Display(client, 20);
 }
 
-public int MenuHandler_ClearZones(Handle tMenu, MenuAction action, int client, int item)
+public int MenuHandler_ClearZones(Menu tMenu, MenuAction action, int client, int item)
 {
 	switch (action)
 	{
@@ -1389,7 +1389,7 @@ public int MenuHandler_ClearZones(Handle tMenu, MenuAction action, int client, i
 		{
 			if (item == 2)
 			{
-				ClearArray(g_Zones);
+				g_Zones.Clear();
 				PrintToChat(client, "Zones cleared");
 				RemoveZones();
 			}
@@ -1398,7 +1398,7 @@ public int MenuHandler_ClearZones(Handle tMenu, MenuAction action, int client, i
 		}
 		case MenuAction_End:
 		{
-			CloseHandle(tMenu);
+			delete tMenu;
 		}
 	}
 	return 0;
@@ -1420,16 +1420,16 @@ stock void RefreshZones()
 		return;
 
 	RemoveZones();
-	int size = GetArraySize(g_Zones);
+	int size = g_Zones.Length;
 	float posA[3];
 	float posB[3];
 	char name[64];
 	for (int i = 0; i < size; ++i)
 	{
-		Handle trie = GetArrayCell(g_Zones, i);
-		GetTrieArray(trie, "corda", posA, sizeof(posA));
-		GetTrieArray(trie, "cordb", posB, sizeof(posB));
-		GetTrieString(trie, "name", name, 64);
+		StringMap trie = g_Zones.Get(i);
+		trie.GetArray("corda", posA, sizeof(posA));
+		trie.GetArray("cordb", posB, sizeof(posB));
+		trie.GetString("name", name, 64);
 		int zone = CreateZoneEntity(posA, posB, name);
 		char id[8];
 		IntToString(i, id, sizeof(id));

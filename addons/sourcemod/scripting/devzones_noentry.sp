@@ -10,22 +10,21 @@
 //End
 
 float zone_pos[MAXPLAYERS+1][3];
-Handle g_hClientTimers[MAXPLAYERS + 1] = {INVALID_HANDLE, ...};
+Handle g_hClientTimers[MAXPLAYERS + 1] = {null, ...};
 
 public Plugin myinfo =
 {
 	name = "SM DEV Zones - NoEntry",
 	author = "Franc1sco franug",
 	description = "",
-	version = "2.0",
+	version = "2.1",
 	url = "http://steamcommunity.com/id/franug"
 };
 
 public void OnClientDisconnect(int client)
 {
-	if (g_hClientTimers[client] != INVALID_HANDLE)
-		KillTimer(g_hClientTimers[client]);
-	g_hClientTimers[client] = INVALID_HANDLE;
+	if (g_hClientTimers[client] != null)
+		delete g_hClientTimers[client];
 }
 
 public void Zone_OnClientEntry(int client, const char[] zone)
@@ -48,9 +47,8 @@ public void Zone_OnClientLeave(int client, const char[] zone)
 		
 	if(StrContains(zone, ZONE_PREFIX, false) == 0)
 	{
-		if (g_hClientTimers[client] != INVALID_HANDLE)
-			KillTimer(g_hClientTimers[client]);
-		g_hClientTimers[client] = INVALID_HANDLE;
+		if (g_hClientTimers[client] != null)
+			delete g_hClientTimers[client];
 	}
 }
 
@@ -58,9 +56,8 @@ public Action Timer_Repeat(Handle timer, any client)
 {
 	if(!IsClientInGame(client) || !IsPlayerAlive(client))
 	{
-		if (g_hClientTimers[client] != INVALID_HANDLE)
-			KillTimer(g_hClientTimers[client]);
-		g_hClientTimers[client] = INVALID_HANDLE;
+		if (g_hClientTimers[client] != null)
+			delete g_hClientTimers[client];
 		return Plugin_Stop;
 	}
 	float clientloc[3];

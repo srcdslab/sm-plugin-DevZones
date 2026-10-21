@@ -17,7 +17,7 @@ public Plugin myinfo =
 	name = "SM DEV Zones - NoBlock",
 	author = "Franc1sco franug",
 	description = "",
-	version = "2.0",
+	version = "2.1",
 	url = "http://www.cola-team.es"
 };
 
@@ -26,9 +26,9 @@ public void OnPluginStart()
 	HookEvent("player_spawn", EventPlayerSpawn);
 }
 
-public void EventPlayerSpawn(Handle event, const char[] name, bool dontBroadcast) 
+public void EventPlayerSpawn(Event event, const char[] name, bool dontBroadcast) 
 {
-	int client = GetClientOfUserId(GetEventInt(event, "userid"));
+	int client = GetClientOfUserId(event.GetInt("userid"));
 	noblock[client] = false;
 }
 
