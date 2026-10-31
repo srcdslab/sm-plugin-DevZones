@@ -17,9 +17,14 @@ public Plugin myinfo =
 	name = "SM DEV Zones - NoEntry",
 	author = "Franc1sco franug",
 	description = "",
-	version = "2.1",
+	version = "2.1.1",
 	url = "http://steamcommunity.com/id/franug"
 };
+
+public void OnPluginStart()
+{
+	LoadTranslations("devzones_noentry.phrases");
+}
 
 public void OnClientDisconnect(int client)
 {
@@ -36,7 +41,7 @@ public void Zone_OnClientEntry(int client, const char[] zone)
 	{
 		Zone_GetZonePosition(zone, false, zone_pos[client]);
 		g_hClientTimers[client] = CreateTimer(0.1, Timer_Repeat, client, TIMER_REPEAT);
-		PrintHintText(client, "You can't enter here!");
+		PrintHintText(client, "%t", "NoEntry Cannot Enter");
 	}
 }
 

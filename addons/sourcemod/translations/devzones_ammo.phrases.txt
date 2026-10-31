@@ -1,0 +1,13 @@
+"Phrases"
+{
+	"Unlimited Ammo Zone"
+	{
+		"en"		"UNLIMITED AMMO ZONE"
+		"fr"		"ZONE DE MUNITIONS ILLIMITÉES"
+		"ru"		"ЗОНА БЕСКОНЕЧНЫХ ПАТРОНОВ"
+		"es"		"ZONA DE MUNICIÓN ILIMITADA"
+		"de"		"ZONE MIT UNBEGRENZTER MUNITION"
+		"pt"		"ZONA DE MUNIÇÃO ILIMITADA"
+		"chi"		"无限弹药区域"
+	}
+}

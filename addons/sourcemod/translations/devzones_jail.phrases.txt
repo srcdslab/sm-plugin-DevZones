@@ -1,0 +1,13 @@
+"Phrases"
+{
+	"Jail Cannot Hurt"
+	{
+		"en"		"You can't hurt players in this zone!"
+		"fr"		"Vous ne pouvez pas blesser de joueurs dans cette zone !"
+		"ru"		"Вы не можете наносить урон игрокам в этой зоне!"
+		"es"		"¡No puedes herir a jugadores en esta zona!"
+		"de"		"Du kannst in dieser Zone keinen Spielern schaden!"
+		"pt"		"Você não pode ferir jogadores nesta zona!"
+		"chi"		"你无法在此区域内伤害玩家！"
+	}
+}

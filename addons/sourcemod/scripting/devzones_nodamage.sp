@@ -11,12 +11,14 @@ public Plugin myinfo =
 	name = "SM DEV Zones - NoDamage",
 	author = "Franc1sco franug",
 	description = "",
-	version = "3.1.1",
+	version = "3.1.2",
 	url = "http://steamcommunity.com/id/franug"
 };
 
 public void OnPluginStart()
 {
+	LoadTranslations("devzones_nodamage.phrases");
+
 	for(int i = 1; i <= MaxClients; i++)
 	{
 		if(IsClientInGame(i))
@@ -37,7 +39,7 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 	if(!Zone_IsClientInZone(victim, "nodamage", false) && !Zone_IsClientInZone(attacker, "nodamage", false))
 		return Plugin_Continue;
 
-	PrintHintText(attacker, "You cant hurt players in that zone!");
+	PrintHintText(attacker, "%t", "NoDamage Cannot Hurt");
 	return Plugin_Handled;
 }
 

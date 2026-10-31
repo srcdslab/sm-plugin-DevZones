@@ -1,0 +1,13 @@
+"Phrases"
+{
+	"NoEntry Cannot Enter"
+	{
+		"en"		"You can't enter here!"
+		"fr"		"Vous ne pouvez pas entrer ici !"
+		"ru"		"Сюда нельзя входить!"
+		"es"		"¡No puedes entrar aquí!"
+		"de"		"Du kannst hier nicht hinein!"
+		"pt"		"Você não pode entrar aqui!"
+		"chi"		"你不能进入这里！"
+	}
+}

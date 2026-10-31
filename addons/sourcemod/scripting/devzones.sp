@@ -21,7 +21,7 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-#define VERSION "4.1.2"
+#define VERSION "4.1.3"
 #define MAX_ZONES 256
 
 int beamColorT[4] =  { 255, 0, 0, 255 };
@@ -84,6 +84,8 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
+	LoadTranslations("devzones.phrases");
+
 	g_Engine = GetEngineVersion();
 
 	cvar_filter = CreateConVar("sm_devzones_filter", "1", "1 = Only allow valid alive clients to be detected in the native zones. 0 = Detect entities and all (you need to add more checkers in the third party plugins).");
@@ -436,7 +438,7 @@ public void SaveZones(int client)
 	kv.ExportToFile(Path);
 	delete kv;
 	if (client != 0)
-		PrintToChat(client, "All zones are saved in file.");
+		PrintToChat(client, "%t", "Zones Saved");
 }
 
 public bool TraceRayDontHitSelf(int entity, int mask, any data)
@@ -460,12 +462,12 @@ public Action fnHookSay(int client, int args)
 	//ReplaceString(sArgs, 192, "\"", ".");
 	if (strlen(sArgs) > 45)
 	{
-		PrintToChat(client, "the name is too long, try other name");
+		PrintToChat(client, "%t", "Zone Name Too Long");
 		return Plugin_Continue;
 	}
 	if (strcmp(sArgs, "!cancel", false) == 0)
 	{
-		PrintToChat(client, "Set name action canceled");
+		PrintToChat(client, "%t", "Zone Name Canceled");
 		EditorMenu(client);
 		return Plugin_Continue;
 	}
@@ -477,13 +479,13 @@ public Action fnHookSay(int client, int args)
 		trie.GetString("name", ZoneId, 64);
 		if (strcmp(ZoneId, sArgs, false) == 0)
 		{
-			PrintToChat(client, "The name already exist, write other name");
+			PrintToChat(client, "%t", "Zone Name Exists");
 			return Plugin_Continue;
 		}
 	}
 	
 	Format(g_CurrentZoneName[client], 64, sArgs);
-	PrintToChat(client, "Zone name set to %s", sArgs);
+	PrintToChat(client, "%t", "Zone Name Set", sArgs);
 	g_bFixName[client] = false;
 	EditorMenu(client);
 	return Plugin_Continue;
@@ -923,13 +925,19 @@ public void ZoneMenu(int client)
 {
 	g_ClientSelectedZone[client] = -1;
 	g_Editing[client] = 0;
+	char sBuffer[128];
 	Menu Menu2 = new Menu(Handle_ZoneMenu);
-	Menu2.SetTitle("Zones");
-	Menu2.AddItem("", "Create Zone");
-	Menu2.AddItem("", "Edit Zones");
-	Menu2.AddItem("", "Save Zones");
-	Menu2.AddItem("", "Reload Zones");
-	Menu2.AddItem("", "Clear Zones");
+	Menu2.SetTitle("%T", "Menu Zones Title", client);
+	FormatEx(sBuffer, sizeof(sBuffer), "%T", "Menu Create Zone", client);
+	Menu2.AddItem("", sBuffer);
+	FormatEx(sBuffer, sizeof(sBuffer), "%T", "Menu Edit Zones", client);
+	Menu2.AddItem("", sBuffer);
+	FormatEx(sBuffer, sizeof(sBuffer), "%T", "Menu Save Zones", client);
+	Menu2.AddItem("", sBuffer);
+	FormatEx(sBuffer, sizeof(sBuffer), "%T", "Menu Reload Zones", client);
+	Menu2.AddItem("", sBuffer);
+	FormatEx(sBuffer, sizeof(sBuffer), "%T", "Menu Clear Zones", client);
+	Menu2.AddItem("", sBuffer);
 	Menu2.ExitBackButton = true;
 	Menu2.Display(client, MENU_TIME_FOREVER);
 }
@@ -958,7 +966,7 @@ public int Handle_ZoneMenu(Menu tMenu, MenuAction action, int client, int item)
 				case 3:
 				{
 					ReadZones();
-					PrintToChat(client, "Zones are reloaded");
+					PrintToChat(client, "%t", "Zones Reloaded");
 					ZoneMenu(client);
 				}
 				case 4:
@@ -978,7 +986,7 @@ public int Handle_ZoneMenu(Menu tMenu, MenuAction action, int client, int item)
 public void ListZones(int client, MenuHandler handler)
 {
 	Menu Menu2 = new Menu(handler);
-	Menu2.SetTitle("Avaliable Zones");
+	Menu2.SetTitle("%T", "Menu Available Zones Title", client);
 	
 	char ZoneName[256];
 	char ZoneId[64];
@@ -996,7 +1004,9 @@ public void ListZones(int client, MenuHandler handler)
 			Menu2.AddItem(Id, ZoneId);
 		}
 	} else {
-		Menu2.AddItem("", "No zones are avaliable", ITEMDRAW_DISABLED);
+		char sBuffer[128];
+		FormatEx(sBuffer, sizeof(sBuffer), "%T", "Menu No Zones", client);
+		Menu2.AddItem("", sBuffer, ITEMDRAW_DISABLED);
 	}
 	Menu2.ExitBackButton = true;
 	Menu2.Display(client, MENU_TIME_FOREVER);
@@ -1009,64 +1019,80 @@ public void EditorMenu(int client)
 		DrawBeamBox(client);
 		g_Editing[client] = 2;
 	}
+	char sBuffer[128];
 	Menu Menu2 = new Menu(MenuHandler_Editor);
 	if (g_ClientSelectedZone[client] != -1)
-		Menu2.SetTitle("Zone Editor (MODIFY)");
+		Menu2.SetTitle("%T", "Menu Editor Modify Title", client);
 	else
-		Menu2.SetTitle("Zone Editor");
+		Menu2.SetTitle("%T", "Menu Editor Title", client);
 	
 	if (g_Editing[client] == 0)
-		Menu2.AddItem("", "Start Zone");
+		FormatEx(sBuffer, sizeof(sBuffer), "%T", "Menu Start Zone", client);
 	else
-		Menu2.AddItem("", "Restart Zone");
+		FormatEx(sBuffer, sizeof(sBuffer), "%T", "Menu Restart Zone", client);
+	Menu2.AddItem("", sBuffer);
 	
 	if (g_Editing[client] > 0)
 	{
-		Menu2.AddItem("", "Set Zone name");
+		FormatEx(sBuffer, sizeof(sBuffer), "%T", "Menu Set Zone Name", client);
+		Menu2.AddItem("", sBuffer);
 		if (g_Editing[client] == 2)
-			Menu2.AddItem("", "Continue Editing");
+			FormatEx(sBuffer, sizeof(sBuffer), "%T", "Menu Continue Editing", client);
 		else
-			Menu2.AddItem("", "Pause Editing");
-		Menu2.AddItem("", "Cancel Zone");
-		Menu2.AddItem("", "Save Zone");
+			FormatEx(sBuffer, sizeof(sBuffer), "%T", "Menu Pause Editing", client);
+		Menu2.AddItem("", sBuffer);
+		FormatEx(sBuffer, sizeof(sBuffer), "%T", "Menu Cancel Zone", client);
+		Menu2.AddItem("", sBuffer);
+		FormatEx(sBuffer, sizeof(sBuffer), "%T", "Menu Save Zone", client);
+		Menu2.AddItem("", sBuffer);
 		switch (g_CurrentZoneTeam[client])
 		{
 			case 0:
 			{
-				Menu2.AddItem("", "Set Zone Yellow");
+				FormatEx(sBuffer, sizeof(sBuffer), "%T", "Menu Set Zone Yellow", client);
+				Menu2.AddItem("", sBuffer);
 			}
 			case 1:
 			{
-				Menu2.AddItem("", "Set Zone Green");
+				FormatEx(sBuffer, sizeof(sBuffer), "%T", "Menu Set Zone Green", client);
+				Menu2.AddItem("", sBuffer);
 			}
 			case 2:
 			{
-				Menu2.AddItem("", "Set Zone Red");
+				FormatEx(sBuffer, sizeof(sBuffer), "%T", "Menu Set Zone Red", client);
+				Menu2.AddItem("", sBuffer);
 			}
 			case 3:
 			{
-				Menu2.AddItem("", "Set Zone Blue");
+				FormatEx(sBuffer, sizeof(sBuffer), "%T", "Menu Set Zone Blue", client);
+				Menu2.AddItem("", sBuffer);
 			}
 		}
-		Menu2.AddItem("", "Go to Zone");
-		Menu2.AddItem("", "Stretch Zone");
+		FormatEx(sBuffer, sizeof(sBuffer), "%T", "Menu Go To Zone", client);
+		Menu2.AddItem("", sBuffer);
+		FormatEx(sBuffer, sizeof(sBuffer), "%T", "Menu Stretch Zone", client);
+		Menu2.AddItem("", sBuffer);
 		switch (g_CurrentZoneVis[client])
 		{
 			case 0:
 			{
-				Menu2.AddItem("", "Visibility: No One");
+				FormatEx(sBuffer, sizeof(sBuffer), "%T", "Menu Visibility None", client);
+				Menu2.AddItem("", sBuffer);
 			}
 			case 1:
 			{
-				Menu2.AddItem("", "Visibility: All");
+				FormatEx(sBuffer, sizeof(sBuffer), "%T", "Menu Visibility All", client);
+				Menu2.AddItem("", sBuffer);
 			}
 			case 2:
 			{
-				Menu2.AddItem("", "Visibility: T");
+				FormatEx(sBuffer, sizeof(sBuffer), "%T", "Menu Visibility T", client);
+				Menu2.AddItem("", sBuffer);
 			}
 			case 3:
 			{
-				Menu2.AddItem("", "Visibility: CT");
+				FormatEx(sBuffer, sizeof(sBuffer), "%T", "Menu Visibility CT", client);
+				Menu2.AddItem("", sBuffer);
 			}
 		}
 	}
@@ -1097,7 +1123,7 @@ public int MenuHandler_Editor(Menu tMenu, MenuAction action, int client, int ite
 				}
 				case 1:
 				{
-					PrintToChat(client, "Write in chat the name for the zone\nType !cancel for cancel the operation");
+					PrintToChat(client, "%t", "Zone Name Prompt");
 					g_bFixName[client] = true;
 					//EditorMenu(client);
 				}
@@ -1149,7 +1175,7 @@ public int MenuHandler_Editor(Menu tMenu, MenuAction action, int client, int ite
 						g_Zones.Push(trie);
 					}
 					//CloseHandle(trie);
-					PrintToChat(client, "Zone saved");
+					PrintToChat(client, "%t", "Zone Saved");
 					g_CurrentZoneTeam[client] = 0;
 					g_CurrentZoneVis[client] = 0;
 					g_Editing[client] = 0;
@@ -1165,20 +1191,20 @@ public int MenuHandler_Editor(Menu tMenu, MenuAction action, int client, int ite
 					{
 						case 1:
 						{
-							PrintToChat(client, "The zone is now Green");
+							PrintToChat(client, "%t", "Zone Now Green");
 						}
 						case 2:
 						{
-							PrintToChat(client, "The zone is now Red");
+							PrintToChat(client, "%t", "Zone Now Red");
 						}
 						case 3:
 						{
-							PrintToChat(client, "The zone is now Blue");
+							PrintToChat(client, "%t", "Zone Now Blue");
 						}
 						case 4:
 						{
 							g_CurrentZoneTeam[client] = 0;
-							PrintToChat(client, "The zone is now Yellow");
+							PrintToChat(client, "%t", "Zone Now Yellow");
 						}
 					}
 					EditorMenu(client);
@@ -1193,7 +1219,7 @@ public int MenuHandler_Editor(Menu tMenu, MenuAction action, int client, int ite
 					ZonePos[2] /= 2.0;
 					TeleportEntity(client, ZonePos, NULL_VECTOR, NULL_VECTOR);
 					EditorMenu(client);
-					PrintToChat(client, "You are teleported to the zone");
+					PrintToChat(client, "%t", "Zone Teleported");
 				}
 				case 7:
 				{
@@ -1207,20 +1233,20 @@ public int MenuHandler_Editor(Menu tMenu, MenuAction action, int client, int ite
 					{
 						case 1:
 						{
-							PrintToChat(client, "The zone is visible for ALL");
+							PrintToChat(client, "%t", "Zone Visible All");
 						}
 						case 2:
 						{
-							PrintToChat(client, "The zone is visible for Terror");
+							PrintToChat(client, "%t", "Zone Visible T");
 						}
 						case 3:
 						{
-							PrintToChat(client, "The zone is visible for Counter-Terrors");
+							PrintToChat(client, "%t", "Zone Visible CT");
 						}
 						case 4:
 						{
 							g_CurrentZoneVis[client] = 0;
-							PrintToChat(client, "The zone is invisible");
+							PrintToChat(client, "%t", "Zone Invisible");
 						}
 					}
 					EditorMenu(client);
@@ -1246,20 +1272,28 @@ int g_ClientSelectedPoint[MAXPLAYERS + 1];
 public void ScaleMenu(int client)
 {
 	g_Editing[client] = 3;
+	char sBuffer[128];
 	Menu Menu2 = new Menu(MenuHandler_Scale);
-	Menu2.SetTitle("Stretch Zone");
+	Menu2.SetTitle("%T", "Menu Stretch Zone", client);
 	if (g_ClientSelectedPoint[client] == 1)
-		Menu2.AddItem("", "Point B");
+		FormatEx(sBuffer, sizeof(sBuffer), "%T", "Menu Point B", client);
 	else
-		Menu2.AddItem("", "Point A");
-	Menu2.AddItem("", "+ Width");
-	Menu2.AddItem("", "- Width");
-	Menu2.AddItem("", "+ Height");
-	Menu2.AddItem("", "- Height");
-	Menu2.AddItem("", "+ Length");
-	Menu2.AddItem("", "- Length");
+		FormatEx(sBuffer, sizeof(sBuffer), "%T", "Menu Point A", client);
+	Menu2.AddItem("", sBuffer);
+	FormatEx(sBuffer, sizeof(sBuffer), "%T", "Menu Width Plus", client);
+	Menu2.AddItem("", sBuffer);
+	FormatEx(sBuffer, sizeof(sBuffer), "%T", "Menu Width Minus", client);
+	Menu2.AddItem("", sBuffer);
+	FormatEx(sBuffer, sizeof(sBuffer), "%T", "Menu Height Plus", client);
+	Menu2.AddItem("", sBuffer);
+	FormatEx(sBuffer, sizeof(sBuffer), "%T", "Menu Height Minus", client);
+	Menu2.AddItem("", sBuffer);
+	FormatEx(sBuffer, sizeof(sBuffer), "%T", "Menu Length Plus", client);
+	Menu2.AddItem("", sBuffer);
+	FormatEx(sBuffer, sizeof(sBuffer), "%T", "Menu Length Minus", client);
+	Menu2.AddItem("", sBuffer);
 	char ScaleSize[128];
-	Format(ScaleSize, sizeof(ScaleSize), "Scale Size %f", g_AvaliableScales[g_ClientSelectedScale[client]]);
+	Format(ScaleSize, sizeof(ScaleSize), "%T", "Menu Scale Size", client, g_AvaliableScales[g_ClientSelectedScale[client]]);
 	Menu2.AddItem("", ScaleSize);
 	Menu2.ExitBackButton = true;
 	Menu2.Display(client, MENU_TIME_FOREVER);
@@ -1373,11 +1407,14 @@ public void GetClientSelectedZone(int client, float poses[2][3], int &team, int 
 
 public void ClearZonesMenu(int client)
 {
+	char sBuffer[128];
 	Menu Menu2 = new Menu(MenuHandler_ClearZones);
-	Menu2.SetTitle("Are you sure, you want to clear all zones on this map?");
-	Menu2.AddItem("", "NO GO BACK!");
-	Menu2.AddItem("", "NO GO BACK!");
-	Menu2.AddItem("", "YES! DO IT!");
+	Menu2.SetTitle("%T", "Menu Clear Confirm Title", client);
+	FormatEx(sBuffer, sizeof(sBuffer), "%T", "Menu Clear No", client);
+	Menu2.AddItem("", sBuffer);
+	Menu2.AddItem("", sBuffer);
+	FormatEx(sBuffer, sizeof(sBuffer), "%T", "Menu Clear Yes", client);
+	Menu2.AddItem("", sBuffer);
 	Menu2.Display(client, 20);
 }
 
@@ -1390,7 +1427,7 @@ public int MenuHandler_ClearZones(Menu tMenu, MenuAction action, int client, int
 			if (item == 2)
 			{
 				g_Zones.Clear();
-				PrintToChat(client, "Zones cleared");
+				PrintToChat(client, "%t", "Zones Cleared");
 				RemoveZones();
 			}
 			ZoneMenu(client);

@@ -1,0 +1,575 @@
+"Phrases"
+{
+	"Zones Saved"
+	{
+		"en"		"All zones have been saved to file."
+		"fr"		"Toutes les zones ont été sauvegardées dans le fichier."
+		"ru"		"Все зоны сохранены в файл."
+		"es"		"Todas las zonas se han guardado en el archivo."
+		"de"		"Alle Zonen wurden in der Datei gespeichert."
+		"pt"		"Todas as zonas foram salvas no arquivo."
+		"chi"		"所有区域已保存到文件。"
+	}
+	"Zone Name Too Long"
+	{
+		"en"		"The name is too long, try another name."
+		"fr"		"Le nom est trop long, essayez un autre nom."
+		"ru"		"Название слишком длинное, попробуйте другое."
+		"es"		"El nombre es demasiado largo, prueba con otro."
+		"de"		"Der Name ist zu lang, versuche einen anderen."
+		"pt"		"O nome é muito longo, tente outro."
+		"chi"		"名称太长，请换一个名称。"
+	}
+	"Zone Name Canceled"
+	{
+		"en"		"Set name action canceled."
+		"fr"		"Changement de nom annulé."
+		"ru"		"Изменение названия отменено."
+		"es"		"Cambio de nombre cancelado."
+		"de"		"Namensänderung abgebrochen."
+		"pt"		"Alteração de nome cancelada."
+		"chi"		"已取消设置名称。"
+	}
+	"Zone Name Exists"
+	{
+		"en"		"This name already exists, enter another name."
+		"fr"		"Ce nom existe déjà, entrez un autre nom."
+		"ru"		"Такое название уже существует, введите другое."
+		"es"		"Ese nombre ya existe, escribe otro."
+		"de"		"Dieser Name existiert bereits, gib einen anderen ein."
+		"pt"		"Esse nome já existe, digite outro."
+		"chi"		"该名称已存在，请输入其他名称。"
+	}
+	"Zone Name Set"
+	{
+		"#format"	"{1:s}"
+		"en"		"Zone name set to {1}"
+		"fr"		"Nom de la zone défini sur {1}"
+		"ru"		"Название зоны изменено на {1}"
+		"es"		"Nombre de la zona cambiado a {1}"
+		"de"		"Zonenname auf {1} gesetzt"
+		"pt"		"Nome da zona definido como {1}"
+		"chi"		"区域名称已设置为 {1}"
+	}
+	"Zones Reloaded"
+	{
+		"en"		"Zones reloaded."
+		"fr"		"Zones rechargées."
+		"ru"		"Зоны перезагружены."
+		"es"		"Zonas recargadas."
+		"de"		"Zonen neu geladen."
+		"pt"		"Zonas recarregadas."
+		"chi"		"区域已重新加载。"
+	}
+	"Zone Name Prompt"
+	{
+		"en"		"Write the name of the zone in chat\nType !cancel to cancel the operation"
+		"fr"		"Écrivez le nom de la zone dans le chat\nTapez !cancel pour annuler"
+		"ru"		"Напишите название зоны в чат\nВведите !cancel для отмены"
+		"es"		"Escribe el nombre de la zona en el chat\nEscribe !cancel para cancelar"
+		"de"		"Schreibe den Namen der Zone in den Chat\nGib !cancel ein, um abzubrechen"
+		"pt"		"Escreva o nome da zona no chat\nDigite !cancel para cancelar"
+		"chi"		"请在聊天框中输入区域名称\n输入 !cancel 取消操作"
+	}
+	"Zone Saved"
+	{
+		"en"		"Zone saved."
+		"fr"		"Zone sauvegardée."
+		"ru"		"Зона сохранена."
+		"es"		"Zona guardada."
+		"de"		"Zone gespeichert."
+		"pt"		"Zona salva."
+		"chi"		"区域已保存。"
+	}
+	"Zone Now Green"
+	{
+		"en"		"The zone is now green."
+		"fr"		"La zone est maintenant verte."
+		"ru"		"Теперь зона зелёная."
+		"es"		"La zona ahora es verde."
+		"de"		"Die Zone ist jetzt grün."
+		"pt"		"A zona agora é verde."
+		"chi"		"该区域现在为绿色。"
+	}
+	"Zone Now Red"
+	{
+		"en"		"The zone is now red."
+		"fr"		"La zone est maintenant rouge."
+		"ru"		"Теперь зона красная."
+		"es"		"La zona ahora es roja."
+		"de"		"Die Zone ist jetzt rot."
+		"pt"		"A zona agora é vermelha."
+		"chi"		"该区域现在为红色。"
+	}
+	"Zone Now Blue"
+	{
+		"en"		"The zone is now blue."
+		"fr"		"La zone est maintenant bleue."
+		"ru"		"Теперь зона синяя."
+		"es"		"La zona ahora es azul."
+		"de"		"Die Zone ist jetzt blau."
+		"pt"		"A zona agora é azul."
+		"chi"		"该区域现在为蓝色。"
+	}
+	"Zone Now Yellow"
+	{
+		"en"		"The zone is now yellow."
+		"fr"		"La zone est maintenant jaune."
+		"ru"		"Теперь зона жёлтая."
+		"es"		"La zona ahora es amarilla."
+		"de"		"Die Zone ist jetzt gelb."
+		"pt"		"A zona agora é amarela."
+		"chi"		"该区域现在为黄色。"
+	}
+	"Zone Teleported"
+	{
+		"en"		"You have been teleported to the zone."
+		"fr"		"Vous avez été téléporté dans la zone."
+		"ru"		"Вы телепортированы в зону."
+		"es"		"Has sido teletransportado a la zona."
+		"de"		"Du wurdest zur Zone teleportiert."
+		"pt"		"Você foi teleportado para a zona."
+		"chi"		"你已被传送到该区域。"
+	}
+	"Zone Visible All"
+	{
+		"en"		"The zone is visible to everyone."
+		"fr"		"La zone est visible par tout le monde."
+		"ru"		"Зона видна всем."
+		"es"		"La zona es visible para todos."
+		"de"		"Die Zone ist für alle sichtbar."
+		"pt"		"A zona está visível para todos."
+		"chi"		"该区域对所有人可见。"
+	}
+	"Zone Visible T"
+	{
+		"en"		"The zone is visible to Terrorists."
+		"fr"		"La zone est visible par les terroristes."
+		"ru"		"Зона видна террористам."
+		"es"		"La zona es visible para los terroristas."
+		"de"		"Die Zone ist für Terroristen sichtbar."
+		"pt"		"A zona está visível para os terroristas."
+		"chi"		"该区域对恐怖分子可见。"
+	}
+	"Zone Visible CT"
+	{
+		"en"		"The zone is visible to Counter-Terrorists."
+		"fr"		"La zone est visible par les antiterroristes."
+		"ru"		"Зона видна спецназу."
+		"es"		"La zona es visible para los antiterroristas."
+		"de"		"Die Zone ist für Anti-Terroristen sichtbar."
+		"pt"		"A zona está visível para os contraterroristas."
+		"chi"		"该区域对反恐精英可见。"
+	}
+	"Zone Invisible"
+	{
+		"en"		"The zone is invisible."
+		"fr"		"La zone est invisible."
+		"ru"		"Зона невидима."
+		"es"		"La zona es invisible."
+		"de"		"Die Zone ist unsichtbar."
+		"pt"		"A zona está invisível."
+		"chi"		"该区域不可见。"
+	}
+	"Zones Cleared"
+	{
+		"en"		"Zones cleared."
+		"fr"		"Zones effacées."
+		"ru"		"Зоны удалены."
+		"es"		"Zonas eliminadas."
+		"de"		"Zonen gelöscht."
+		"pt"		"Zonas apagadas."
+		"chi"		"区域已清除。"
+	}
+	"Menu Zones Title"
+	{
+		"en"		"Zones"
+		"fr"		"Zones"
+		"ru"		"Зоны"
+		"es"		"Zonas"
+		"de"		"Zonen"
+		"pt"		"Zonas"
+		"chi"		"区域"
+	}
+	"Menu Create Zone"
+	{
+		"en"		"Create Zone"
+		"fr"		"Créer une zone"
+		"ru"		"Создать зону"
+		"es"		"Crear zona"
+		"de"		"Zone erstellen"
+		"pt"		"Criar zona"
+		"chi"		"创建区域"
+	}
+	"Menu Edit Zones"
+	{
+		"en"		"Edit Zones"
+		"fr"		"Modifier les zones"
+		"ru"		"Редактировать зоны"
+		"es"		"Editar zonas"
+		"de"		"Zonen bearbeiten"
+		"pt"		"Editar zonas"
+		"chi"		"编辑区域"
+	}
+	"Menu Save Zones"
+	{
+		"en"		"Save Zones"
+		"fr"		"Sauvegarder les zones"
+		"ru"		"Сохранить зоны"
+		"es"		"Guardar zonas"
+		"de"		"Zonen speichern"
+		"pt"		"Salvar zonas"
+		"chi"		"保存所有区域"
+	}
+	"Menu Reload Zones"
+	{
+		"en"		"Reload Zones"
+		"fr"		"Recharger les zones"
+		"ru"		"Перезагрузить зоны"
+		"es"		"Recargar zonas"
+		"de"		"Zonen neu laden"
+		"pt"		"Recarregar zonas"
+		"chi"		"重新加载所有区域"
+	}
+	"Menu Clear Zones"
+	{
+		"en"		"Clear Zones"
+		"fr"		"Effacer les zones"
+		"ru"		"Удалить все зоны"
+		"es"		"Borrar zonas"
+		"de"		"Zonen löschen"
+		"pt"		"Apagar zonas"
+		"chi"		"清除所有区域"
+	}
+	"Menu Available Zones Title"
+	{
+		"en"		"Available Zones"
+		"fr"		"Zones disponibles"
+		"ru"		"Доступные зоны"
+		"es"		"Zonas disponibles"
+		"de"		"Verfügbare Zonen"
+		"pt"		"Zonas disponíveis"
+		"chi"		"可用区域"
+	}
+	"Menu No Zones"
+	{
+		"en"		"No zones available"
+		"fr"		"Aucune zone disponible"
+		"ru"		"Нет доступных зон"
+		"es"		"No hay zonas disponibles"
+		"de"		"Keine Zonen verfügbar"
+		"pt"		"Nenhuma zona disponível"
+		"chi"		"没有可用的区域"
+	}
+	"Menu Editor Modify Title"
+	{
+		"en"		"Zone Editor (MODIFY)"
+		"fr"		"Éditeur de zone (MODIFICATION)"
+		"ru"		"Редактор зон (ИЗМЕНЕНИЕ)"
+		"es"		"Editor de zonas (MODIFICAR)"
+		"de"		"Zoneneditor (BEARBEITEN)"
+		"pt"		"Editor de zonas (MODIFICAR)"
+		"chi"		"区域编辑器（修改）"
+	}
+	"Menu Editor Title"
+	{
+		"en"		"Zone Editor"
+		"fr"		"Éditeur de zone"
+		"ru"		"Редактор зон"
+		"es"		"Editor de zonas"
+		"de"		"Zoneneditor"
+		"pt"		"Editor de zonas"
+		"chi"		"区域编辑器"
+	}
+	"Menu Start Zone"
+	{
+		"en"		"Start Zone"
+		"fr"		"Commencer la zone"
+		"ru"		"Начать зону"
+		"es"		"Iniciar zona"
+		"de"		"Zone beginnen"
+		"pt"		"Iniciar zona"
+		"chi"		"开始绘制区域"
+	}
+	"Menu Restart Zone"
+	{
+		"en"		"Restart Zone"
+		"fr"		"Recommencer la zone"
+		"ru"		"Начать зону заново"
+		"es"		"Reiniciar zona"
+		"de"		"Zone neu beginnen"
+		"pt"		"Reiniciar zona"
+		"chi"		"重新绘制区域"
+	}
+	"Menu Set Zone Name"
+	{
+		"en"		"Set Zone name"
+		"fr"		"Définir le nom de la zone"
+		"ru"		"Задать название зоны"
+		"es"		"Poner nombre a la zona"
+		"de"		"Zonennamen festlegen"
+		"pt"		"Definir nome da zona"
+		"chi"		"设置区域名称"
+	}
+	"Menu Continue Editing"
+	{
+		"en"		"Continue Editing"
+		"fr"		"Reprendre l'édition"
+		"ru"		"Продолжить редактирование"
+		"es"		"Continuar edición"
+		"de"		"Bearbeitung fortsetzen"
+		"pt"		"Continuar edição"
+		"chi"		"继续编辑"
+	}
+	"Menu Pause Editing"
+	{
+		"en"		"Pause Editing"
+		"fr"		"Mettre l'édition en pause"
+		"ru"		"Приостановить редактирование"
+		"es"		"Pausar edición"
+		"de"		"Bearbeitung pausieren"
+		"pt"		"Pausar edição"
+		"chi"		"暂停编辑"
+	}
+	"Menu Cancel Zone"
+	{
+		"en"		"Cancel Zone"
+		"fr"		"Annuler la zone"
+		"ru"		"Отменить зону"
+		"es"		"Cancelar zona"
+		"de"		"Zone abbrechen"
+		"pt"		"Cancelar zona"
+		"chi"		"取消区域"
+	}
+	"Menu Save Zone"
+	{
+		"en"		"Save Zone"
+		"fr"		"Sauvegarder la zone"
+		"ru"		"Сохранить зону"
+		"es"		"Guardar zona"
+		"de"		"Zone speichern"
+		"pt"		"Salvar zona"
+		"chi"		"保存区域"
+	}
+	"Menu Set Zone Yellow"
+	{
+		"en"		"Set Zone Yellow"
+		"fr"		"Mettre la zone en jaune"
+		"ru"		"Сделать зону жёлтой"
+		"es"		"Poner la zona amarilla"
+		"de"		"Zone gelb machen"
+		"pt"		"Deixar a zona amarela"
+		"chi"		"将区域设为黄色"
+	}
+	"Menu Set Zone Green"
+	{
+		"en"		"Set Zone Green"
+		"fr"		"Mettre la zone en vert"
+		"ru"		"Сделать зону зелёной"
+		"es"		"Poner la zona verde"
+		"de"		"Zone grün machen"
+		"pt"		"Deixar a zona verde"
+		"chi"		"将区域设为绿色"
+	}
+	"Menu Set Zone Red"
+	{
+		"en"		"Set Zone Red"
+		"fr"		"Mettre la zone en rouge"
+		"ru"		"Сделать зону красной"
+		"es"		"Poner la zona roja"
+		"de"		"Zone rot machen"
+		"pt"		"Deixar a zona vermelha"
+		"chi"		"将区域设为红色"
+	}
+	"Menu Set Zone Blue"
+	{
+		"en"		"Set Zone Blue"
+		"fr"		"Mettre la zone en bleu"
+		"ru"		"Сделать зону синей"
+		"es"		"Poner la zona azul"
+		"de"		"Zone blau machen"
+		"pt"		"Deixar a zona azul"
+		"chi"		"将区域设为蓝色"
+	}
+	"Menu Go To Zone"
+	{
+		"en"		"Go to Zone"
+		"fr"		"Aller à la zone"
+		"ru"		"Перейти к зоне"
+		"es"		"Ir a la zona"
+		"de"		"Zur Zone gehen"
+		"pt"		"Ir para a zona"
+		"chi"		"前往区域"
+	}
+	"Menu Stretch Zone"
+	{
+		"en"		"Stretch Zone"
+		"fr"		"Étirer la zone"
+		"ru"		"Растянуть зону"
+		"es"		"Estirar zona"
+		"de"		"Zone strecken"
+		"pt"		"Esticar zona"
+		"chi"		"拉伸区域"
+	}
+	"Menu Visibility None"
+	{
+		"en"		"Visibility: No One"
+		"fr"		"Visibilité : personne"
+		"ru"		"Видимость: никто"
+		"es"		"Visibilidad: nadie"
+		"de"		"Sichtbarkeit: niemand"
+		"pt"		"Visibilidade: ninguém"
+		"chi"		"可见性：无人"
+	}
+	"Menu Visibility All"
+	{
+		"en"		"Visibility: All"
+		"fr"		"Visibilité : tous"
+		"ru"		"Видимость: все"
+		"es"		"Visibilidad: todos"
+		"de"		"Sichtbarkeit: alle"
+		"pt"		"Visibilidade: todos"
+		"chi"		"可见性：所有人"
+	}
+	"Menu Visibility T"
+	{
+		"en"		"Visibility: T"
+		"fr"		"Visibilité : T"
+		"ru"		"Видимость: T"
+		"es"		"Visibilidad: T"
+		"de"		"Sichtbarkeit: T"
+		"pt"		"Visibilidade: T"
+		"chi"		"可见性：T"
+	}
+	"Menu Visibility CT"
+	{
+		"en"		"Visibility: CT"
+		"fr"		"Visibilité : CT"
+		"ru"		"Видимость: CT"
+		"es"		"Visibilidad: CT"
+		"de"		"Sichtbarkeit: CT"
+		"pt"		"Visibilidade: CT"
+		"chi"		"可见性：CT"
+	}
+	"Menu Point A"
+	{
+		"en"		"Point A"
+		"fr"		"Point A"
+		"ru"		"Точка A"
+		"es"		"Punto A"
+		"de"		"Punkt A"
+		"pt"		"Ponto A"
+		"chi"		"A 点"
+	}
+	"Menu Point B"
+	{
+		"en"		"Point B"
+		"fr"		"Point B"
+		"ru"		"Точка B"
+		"es"		"Punto B"
+		"de"		"Punkt B"
+		"pt"		"Ponto B"
+		"chi"		"B 点"
+	}
+	"Menu Width Plus"
+	{
+		"en"		"+ Width"
+		"fr"		"+ Largeur"
+		"ru"		"+ Ширина"
+		"es"		"+ Ancho"
+		"de"		"+ Breite"
+		"pt"		"+ Largura"
+		"chi"		"+ 宽度"
+	}
+	"Menu Width Minus"
+	{
+		"en"		"- Width"
+		"fr"		"- Largeur"
+		"ru"		"- Ширина"
+		"es"		"- Ancho"
+		"de"		"- Breite"
+		"pt"		"- Largura"
+		"chi"		"- 宽度"
+	}
+	"Menu Height Plus"
+	{
+		"en"		"+ Height"
+		"fr"		"+ Hauteur"
+		"ru"		"+ Высота"
+		"es"		"+ Alto"
+		"de"		"+ Höhe"
+		"pt"		"+ Altura"
+		"chi"		"+ 高度"
+	}
+	"Menu Height Minus"
+	{
+		"en"		"- Height"
+		"fr"		"- Hauteur"
+		"ru"		"- Высота"
+		"es"		"- Alto"
+		"de"		"- Höhe"
+		"pt"		"- Altura"
+		"chi"		"- 高度"
+	}
+	"Menu Length Plus"
+	{
+		"en"		"+ Length"
+		"fr"		"+ Longueur"
+		"ru"		"+ Длина"
+		"es"		"+ Largo"
+		"de"		"+ Länge"
+		"pt"		"+ Comprimento"
+		"chi"		"+ 长度"
+	}
+	"Menu Length Minus"
+	{
+		"en"		"- Length"
+		"fr"		"- Longueur"
+		"ru"		"- Длина"
+		"es"		"- Largo"
+		"de"		"- Länge"
+		"pt"		"- Comprimento"
+		"chi"		"- 长度"
+	}
+	"Menu Scale Size"
+	{
+		"#format"	"{1:f}"
+		"en"		"Scale Size {1}"
+		"fr"		"Taille du pas : {1}"
+		"ru"		"Шаг: {1}"
+		"es"		"Tamaño del paso: {1}"
+		"de"		"Schrittgröße: {1}"
+		"pt"		"Tamanho do passo: {1}"
+		"chi"		"步长：{1}"
+	}
+	"Menu Clear Confirm Title"
+	{
+		"en"		"Are you sure you want to clear all zones on this map?"
+		"fr"		"Voulez-vous vraiment effacer toutes les zones de cette map ?"
+		"ru"		"Вы уверены, что хотите удалить все зоны на этой карте?"
+		"es"		"¿Seguro que quieres borrar todas las zonas de este mapa?"
+		"de"		"Willst du wirklich alle Zonen auf dieser Map löschen?"
+		"pt"		"Tem certeza de que deseja apagar todas as zonas deste mapa?"
+		"chi"		"你确定要清除此地图上的所有区域吗？"
+	}
+	"Menu Clear No"
+	{
+		"en"		"NO GO BACK!"
+		"fr"		"NON, RETOUR !"
+		"ru"		"НЕТ, НАЗАД!"
+		"es"		"¡NO, VOLVER!"
+		"de"		"NEIN, ZURÜCK!"
+		"pt"		"NÃO, VOLTAR!"
+		"chi"		"不，返回！"
+	}
+	"Menu Clear Yes"
+	{
+		"en"		"YES! DO IT!"
+		"fr"		"OUI ! ALLEZ-Y !"
+		"ru"		"ДА! УДАЛИТЬ!"
+		"es"		"¡SÍ! ¡HAZLO!"
+		"de"		"JA! LOS!"
+		"pt"		"SIM! FAÇA ISSO!"
+		"chi"		"是的！执行！"
+	}
+}

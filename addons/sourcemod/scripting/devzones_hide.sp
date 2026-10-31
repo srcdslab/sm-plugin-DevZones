@@ -15,12 +15,14 @@ public Plugin myinfo =
 	name = "SM DEV Zones - Hide",
 	author = "Franc1sco franug",
 	description = "",
-	version = "2.1",
+	version = "2.1.1",
 	url = "http://www.zeuszombie.com/"
 };
 
 public void OnPluginStart()
 {
+	LoadTranslations("devzones_hide.phrases");
+
 	HookEvent("player_spawn", PlayerSpawn);
 	HookEvent("player_team", Event_PlayerTeam);
 }
@@ -62,8 +64,8 @@ public void Zone_OnClientEntry(int client, const char[] zone)
 	if(StrContains(zone, "hide", false) != 0)
 		return;
 
-	PrintHintText(client, "You entered in a hide teammates zone to improve the vision");
-	CPrintToChat(client," {darkred}[HIDE TEAMMATES]{lime}You entered in a hide teammates zone to improve the vision");
+	PrintHintText(client, "%t", "Hide Zone Entered");
+	CPrintToChat(client," {darkred}[HIDE TEAMMATES]{lime}%t", "Hide Zone Entered");
 
 	if(!hide[client])
 		YesHide(client);
@@ -77,8 +79,8 @@ public void Zone_OnClientLeave(int client, const char[] zone)
 	if (StrContains(zone, "hide", false) != 0)
 		return;
 
-	PrintHintText(client, "You left the hide teammates zone");
-	CPrintToChat(client," {darkred}[HIDE TEAMMATES]{lime}You left the hide teammates zone");
+	PrintHintText(client, "%t", "Hide Zone Left");
+	CPrintToChat(client," {darkred}[HIDE TEAMMATES]{lime}%t", "Hide Zone Left");
 	
 	if (hide[client])
 		NoHide(client);

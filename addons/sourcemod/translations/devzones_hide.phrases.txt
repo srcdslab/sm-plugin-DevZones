@@ -1,0 +1,23 @@
+"Phrases"
+{
+	"Hide Zone Entered"
+	{
+		"en"		"You entered a hide teammates zone to improve the vision"
+		"fr"		"Vous êtes entré dans une zone qui masque vos coéquipiers pour améliorer la visibilité"
+		"ru"		"Вы вошли в зону скрытия союзников для лучшей видимости"
+		"es"		"Has entrado en una zona que oculta a tus compañeros para mejorar la visión"
+		"de"		"Du hast eine Zone betreten, die Teamkameraden für bessere Sicht ausblendet"
+		"pt"		"Você entrou em uma zona que oculta os companheiros de equipe para melhorar a visão"
+		"chi"		"你进入了隐藏队友区域，以改善视野"
+	}
+	"Hide Zone Left"
+	{
+		"en"		"You left the hide teammates zone"
+		"fr"		"Vous avez quitté la zone qui masque vos coéquipiers"
+		"ru"		"Вы покинули зону скрытия союзников"
+		"es"		"Has salido de la zona que oculta a tus compañeros"
+		"de"		"Du hast die Zone verlassen, die Teamkameraden ausblendet"
+		"pt"		"Você saiu da zona que oculta os companheiros de equipe"
+		"chi"		"你离开了隐藏队友区域"
+	}
+}

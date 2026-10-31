@@ -1,0 +1,13 @@
+"Phrases"
+{
+	"NoDamage Cannot Hurt"
+	{
+		"en"		"You can't hurt players in that zone!"
+		"fr"		"Vous ne pouvez pas blesser de joueurs dans cette zone !"
+		"ru"		"Вы не можете наносить урон игрокам в этой зоне!"
+		"es"		"¡No puedes herir a jugadores en esa zona!"
+		"de"		"Du kannst in dieser Zone keinen Spielern schaden!"
+		"pt"		"Você não pode ferir jogadores nessa zona!"
+		"chi"		"你无法伤害该区域内的玩家！"
+	}
+}
