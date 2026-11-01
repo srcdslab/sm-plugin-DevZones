@@ -21,7 +21,7 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-#define VERSION "4.1.3"
+#define VERSION "4.1.4"
 #define MAX_ZONES 256
 
 int beamColorT[4] =  { 255, 0, 0, 255 };
@@ -245,7 +245,7 @@ public void EntOut_OnStartTouch(const char[] output, int caller, int activator, 
 	Entity_GetGlobalName(caller, nBuf, sizeof(nBuf));
 	int callerId = StringToInt(nBuf);
 	g_iZones[activator][callerId].liThis = true;
-	Format(g_iZones[activator][callerId].liName, 64, sTargetName);
+	strcopy(g_iZones[activator][callerId].liName, 64, sTargetName);
 	//PrintToChatAll("E::%i::%s::", callerId, sTargetName);
 	Call_StartForward(hOnClientEntry);
 	Call_PushCell(activator);
@@ -484,7 +484,7 @@ public Action fnHookSay(int client, int args)
 		}
 	}
 	
-	Format(g_CurrentZoneName[client], 64, sArgs);
+	strcopy(g_CurrentZoneName[client], 64, sArgs);
 	PrintToChat(client, "%t", "Zone Name Set", sArgs);
 	g_bFixName[client] = false;
 	EditorMenu(client);
@@ -741,7 +741,7 @@ public Action BeamBoxAll(Handle timer, any data)
 						{
 							// entra
 							g_iZones[p][i].liThis = true;
-							Format(g_iZones[p][i].liName, 64, name);
+							strcopy(g_iZones[p][i].liName, 64, name);
 							Call_StartForward(hOnClientEntry);
 							Call_PushCell(p);
 							Call_PushString(g_iZones[p][i].liName);
@@ -754,7 +754,7 @@ public Action BeamBoxAll(Handle timer, any data)
 						{
 							// sale
 							g_iZones[p][i].liThis = false;
-							Format(g_iZones[p][i].liName, 64, name);
+							strcopy(g_iZones[p][i].liName, 64, name);
 							Call_StartForward(hOnClientLeave);
 							Call_PushCell(p);
 							Call_PushString(g_iZones[p][i].liName);
@@ -1000,7 +1000,7 @@ public void ListZones(int client, MenuHandler handler)
 			view_as<StringMap>(g_Zones.Get(i)).GetValue("team", TeamId);
 			view_as<StringMap>(g_Zones.Get(i)).GetString("name", ZoneId, 64);
 			IntToString(i, Id, sizeof(Id));
-			Format(ZoneName, sizeof(ZoneName), ZoneId);
+			strcopy(ZoneName, sizeof(ZoneName), ZoneId);
 			Menu2.AddItem(Id, ZoneId);
 		}
 	} else {
