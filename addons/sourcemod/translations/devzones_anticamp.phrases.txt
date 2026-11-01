@@ -1,0 +1,36 @@
+"Phrases"
+{
+	"AntiCamp Entered"
+	{
+		"#format"	"{1:d}"
+		"en"		"You have entered an AntiCamp zone for your team\nYou have {1} seconds to leave this zone or you will die"
+		"fr"		"Vous êtes entré dans une zone anti-camp de votre équipe\nVous avez {1} secondes pour quitter cette zone ou vous mourrez"
+		"ru"		"Вы вошли в зону анти-кемпинга вашей команды\nУ вас есть {1} сек., чтобы покинуть её, иначе вы умрёте"
+		"es"		"Has entrado en una zona anti-camp de tu equipo\nTienes {1} segundos para salir de esta zona o morirás"
+		"de"		"Du hast eine Anti-Camp-Zone deines Teams betreten\nDu hast {1} Sekunden, um diese Zone zu verlassen, sonst stirbst du"
+		"pt"		"Você entrou em uma zona anti-camp do seu time\nVocê tem {1} segundos para sair desta zona ou vai morrer"
+		"chi"		"你进入了本队的反蹲点区域\n你有 {1} 秒离开此区域，否则将会死亡"
+	}
+	"AntiCamp Entered One Second"
+	{
+		"#format"	"{1:d}"
+		"en"		"You have entered an AntiCamp zone for your team\nYou have {1} second to leave this zone or you will die"
+		"fr"		"Vous êtes entré dans une zone anti-camp de votre équipe\nVous avez {1} seconde pour quitter cette zone ou vous mourrez"
+		"ru"		"Вы вошли в зону анти-кемпинга вашей команды\nУ вас есть {1} сек., чтобы покинуть её, иначе вы умрёте"
+		"es"		"Has entrado en una zona anti-camp de tu equipo\nTienes {1} segundo para salir de esta zona o morirás"
+		"de"		"Du hast eine Anti-Camp-Zone deines Teams betreten\nDu hast {1} Sekunde, um diese Zone zu verlassen, sonst stirbst du"
+		"pt"		"Você entrou em uma zona anti-camp do seu time\nVocê tem {1} segundo para sair desta zona ou vai morrer"
+		"chi"		"你进入了本队的反蹲点区域\n你有 {1} 秒离开此区域，否则将会死亡"
+	}
+	"AntiCamp Killed"
+	{
+		"#format"	"{1:N}"
+		"en"		"{1} has been killed for camping in an AntiCamp zone"
+		"fr"		"{1} a été tué pour avoir campé dans une zone anti-camp"
+		"ru"		"{1} убит за кемпинг в зоне анти-кемпинга"
+		"es"		"{1} ha muerto por campear en una zona anti-camp"
+		"de"		"{1} wurde wegen Campens in einer Anti-Camp-Zone getötet"
+		"pt"		"{1} foi morto por campar em uma zona anti-camp"
+		"chi"		"{1} 因在反蹲点区域蹲点而被处死"
+	}
+}

@@ -13,12 +13,14 @@ public Plugin myinfo =
 	name = "SM DEV Zones - Jail Damage",
 	author = "Franc1sco franug",
 	description = "",
-	version = "2.0.2",
+	version = "2.0.3",
 	url = "http://www.cola-team.es"
 };
 
 public void OnPluginStart()
 {
+	LoadTranslations("devzones_jail.phrases");
+
 	HookEvent("player_spawn", PlayerSpawn);
 }
 
@@ -80,7 +82,7 @@ public Action OnTakeDamage(int client, int &attacker, int &inflictor, float &dam
 		return Plugin_Continue;
 	}
 
-	PrintHintText(attacker, "You cant hurt players in this zone!");
+	PrintHintText(attacker, "%t", "Jail Cannot Hurt");
 	return Plugin_Handled;
 }
 

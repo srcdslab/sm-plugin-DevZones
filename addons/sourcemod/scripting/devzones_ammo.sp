@@ -19,12 +19,14 @@ public Plugin myinfo =
 	name = "SM DEV Zones - Infinite Ammo",
 	author = "Franc1sco franug",
 	description = "",
-	version = "2.1",
+	version = "2.1.1",
 	url = "http://steamcommunity.com/id/franug"
 };
 
 public void OnPluginStart()
 {
+	LoadTranslations("devzones_ammo.phrases");
+
 	HookEvent("player_spawn", PlayerSpawn);
 	HookEvent("weapon_fire", EventWeaponFire);
 	
@@ -60,7 +62,7 @@ public void Zone_OnClientEntry(int client, const char[] zone)
 			
 	if(StrContains(zone, "ammo", false) != 0)
 		return;
-	PrintHintText(client, "UNLIMITED AMMO ZONE");
+	PrintHintText(client, "%t", "Unlimited Ammo Zone");
 	infiniteammo[client] = true;
 }
 

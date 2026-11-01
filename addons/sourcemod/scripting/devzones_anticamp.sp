@@ -13,12 +13,14 @@ public Plugin myinfo =
 	name = "SM DEV Zones - AntiCamp",
 	author = "Franc1sco franug",
 	description = "",
-	version = "2.1",
+	version = "2.1.1",
 	url = "http://www.clanuea.com/"
 };
 
 public void OnPluginStart()
 {
+	LoadTranslations("devzones_anticamp.phrases");
+
 	cvar_time = CreateConVar("sm_devzones_anticamptime", "10", "Time in seconds before players must leave the zone or die");
 }
 
@@ -43,7 +45,7 @@ public void Zone_OnClientEntry(int client, const char[] zone)
 	{
 		int seconds = cvar_time.IntValue;
 		g_hClientTimers[client] = CreateTimer(seconds * 1.0, Timer_End, client);
-		PrintHintText(client, "You has entered in a AntiCamp Zone for your team\nYou have %i seconds for leave this zone or you will die", seconds);
+		PrintHintText(client, "%t", seconds == 1 ? "AntiCamp Entered One Second" : "AntiCamp Entered", seconds);
 	}
 }
 
@@ -64,7 +66,7 @@ public Action Timer_End(Handle timer, any client)
 	if(IsPlayerAlive(client))
 	{
 		ForcePlayerSuicide(client);
-		PrintToChatAll("%N have beeen killed for camp in a anticamp zone",client);
+		PrintToChatAll("%t", "AntiCamp Killed", client);
 	}
 	g_hClientTimers[client] = null;
 	return Plugin_Continue;
