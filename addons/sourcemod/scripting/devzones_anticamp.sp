@@ -13,7 +13,7 @@ public Plugin myinfo =
 	name = "SM DEV Zones - AntiCamp",
 	author = "Franc1sco franug",
 	description = "",
-	version = "2.1.1",
+	version = "2.1.2",
 	url = "http://www.clanuea.com/"
 };
 
@@ -44,7 +44,9 @@ public void Zone_OnClientEntry(int client, const char[] zone)
 	if((StrContains(zone, "AntiCampCT", false) == 0 && GetClientTeam(client) == 3) || (StrContains(zone, "AntiCampTT", false) == 0 && GetClientTeam(client) == 2))
 	{
 		int seconds = cvar_time.IntValue;
-		g_hClientTimers[client] = CreateTimer(seconds * 1.0, Timer_End, client);
+		if (g_hClientTimers[client] != null)
+			delete g_hClientTimers[client];
+		g_hClientTimers[client] = CreateTimer(seconds * 1.0, Timer_End, GetClientUserId(client));
 		PrintHintText(client, "%t", seconds == 1 ? "AntiCamp Entered One Second" : "AntiCamp Entered", seconds);
 	}
 }
@@ -61,8 +63,12 @@ public void Zone_OnClientLeave(int client, const char[] zone)
 	}
 }
 
-public Action Timer_End(Handle timer, any client)
+public Action Timer_End(Handle timer, any userid)
 {
+	int client = GetClientOfUserId(userid);
+	if (!client)
+		return Plugin_Continue;
+
 	if(IsPlayerAlive(client))
 	{
 		ForcePlayerSuicide(client);

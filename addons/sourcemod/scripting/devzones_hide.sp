@@ -15,7 +15,7 @@ public Plugin myinfo =
 	name = "SM DEV Zones - Hide",
 	author = "Franc1sco franug",
 	description = "",
-	version = "2.1.1",
+	version = "2.1.2",
 	url = "http://www.zeuszombie.com/"
 };
 
@@ -45,13 +45,14 @@ public Action PlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 	if (hide[client])
 		NoHide(client);
 
-	CreateTimer(4.0, OnPostPlayerSpawn, client);
+	CreateTimer(4.0, OnPostPlayerSpawn, GetClientUserId(client));
 	return Plugin_Continue;
 }
 
-public Action OnPostPlayerSpawn(Handle timer, any client)
+public Action OnPostPlayerSpawn(Handle timer, any userid)
 {
-	if (IsClientInGame(client) && hide[client])
+	int client = GetClientOfUserId(userid);
+	if (client != 0 && IsClientInGame(client) && hide[client])
 		NoHide(client);
 	return Plugin_Continue;
 }

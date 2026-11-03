@@ -17,7 +17,7 @@ public Plugin myinfo =
 	name = "SM DEV Zones - NoEntry",
 	author = "Franc1sco franug",
 	description = "",
-	version = "2.1.1",
+	version = "2.1.2",
 	url = "http://steamcommunity.com/id/franug"
 };
 
@@ -40,6 +40,8 @@ public void Zone_OnClientEntry(int client, const char[] zone)
 	if(StrContains(zone, ZONE_PREFIX, false) == 0)
 	{
 		Zone_GetZonePosition(zone, false, zone_pos[client]);
+		if (g_hClientTimers[client] != null)
+			delete g_hClientTimers[client];
 		g_hClientTimers[client] = CreateTimer(0.1, Timer_Repeat, client, TIMER_REPEAT);
 		PrintHintText(client, "%t", "NoEntry Cannot Enter");
 	}
