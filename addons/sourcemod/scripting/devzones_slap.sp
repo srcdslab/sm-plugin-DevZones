@@ -17,7 +17,7 @@ public Plugin myinfo =
 	name = "SM DEV Zones - Slap",
 	author = "Franc1sco franug",
 	description = "",
-	version = "2.2.1",
+	version = "2.2.2",
 	url = "http://www.clanuea.com/"
 };
 
@@ -56,8 +56,8 @@ public Action Timer_Repeat(Handle timer, any client)
 {
 	if(!IsPlayerAlive(client))
 	{
-		if (g_hClientTimers[client] != null)
-			delete g_hClientTimers[client];
+		// Plugin_Stop ends the timer: deleting it here would free its handle twice.
+		g_hClientTimers[client] = null;
 		return Plugin_Stop;
 	}
 	SlapPlayer(client, 0, false);
