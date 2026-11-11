@@ -21,7 +21,7 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-#define VERSION "4.1.4"
+#define VERSION "4.1.5"
 #define MAX_ZONES 256
 
 int beamColorT[4] =  { 255, 0, 0, 255 };
