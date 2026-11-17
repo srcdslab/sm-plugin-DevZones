@@ -17,7 +17,7 @@ public Plugin myinfo =
 	name = "SM DEV Zones - NoEntry",
 	author = "Franc1sco franug",
 	description = "",
-	version = "2.1.2",
+	version = "2.1.3",
 	url = "http://steamcommunity.com/id/franug"
 };
 
@@ -63,8 +63,8 @@ public Action Timer_Repeat(Handle timer, any client)
 {
 	if(!IsClientInGame(client) || !IsPlayerAlive(client))
 	{
-		if (g_hClientTimers[client] != null)
-			delete g_hClientTimers[client];
+		// Plugin_Stop ends the timer: deleting it here would free its handle twice.
+		g_hClientTimers[client] = null;
 		return Plugin_Stop;
 	}
 	float clientloc[3];
